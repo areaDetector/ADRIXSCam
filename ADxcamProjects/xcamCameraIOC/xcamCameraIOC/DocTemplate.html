@@ -1,0 +1,276 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>RIXSCam EPICS areaDetector driver</title>
+    <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
+</head>
+<body>
+    <div style="text-align: center">
+        <h1>
+            RIXSCam EPICS areaDetector driver
+        </h1>
+        <h2>
+            February 2016
+        </h2>
+        <h2>
+            XCAM Ltd.
+        </h2>
+    </div>
+    <h2>
+        Table of Contents
+    </h2>
+    <ul>
+        <li><a href="#Introduction">Introduction</a></li>
+        <li><a href="#StandardNotes">Implementation of standard driver parameters</a></li>
+        <li><a href="#Driver_parameters">RIXSCam-specific parameters</a></li>
+        <li><a href="#Unsupported">Unsupported standard driver parameters</a></li>
+        <li><a href="#Usage">Usage</a></li>
+        <li><a href="#Configuration">Configuration</a></li>
+        <li><a href="#OPI_screens">OPI screens</a></li>
+        <li><a href="#Restrictions">Restrictions</a> </li>
+    </ul>
+    <h2 id="Introduction" style="text-align: left">
+        Introduction
+    </h2>
+    <p>
+        This is an <a href="http://www.aps.anl.gov/epics">EPICS</a> <a href="areaDetector.html">
+            areaDetector
+        </a> driver for RIXSCam cameras from <a href="http://www.xcam.co.uk">
+            XCAM Ltd.
+        </a>.  The driver is supported on 64-bit Windows only. 
+    </p>
+    <p>
+        The driver provides access to essentially all of the features of the RIXSCam.
+    </p>
+    <ul>
+        <li>Fixed number of frames or continuous acquisition.</li>
+        <li>Adjustable voltage and clock settings</li>
+        <li>Support for different trigger modes</li>
+        <li>Binning and Area Of Interest (AOI) readout</li>
+        <li>Set and monitor the camera temperature</li>
+    </ul>
+    <p>
+        This driver inherits from <a href="areaDetectorDoc.html#ADDriver">ADDriver</a>.
+        It implements many of the parameters in <a href="areaDetectorDoxygenHTML/asyn_n_d_array_driver_8h.html">
+            asynNDArrayDriver.h
+        </a> and in <a href="areaDetectorDoxygenHTML/_a_d_driver_8h.html">
+            ADArrayDriver.h
+        </a>. It also implements a number of parameters that are specific
+        to the RIXSCam.
+    </p>
+    <p>
+        This document does not attempt to explain the meaning of the RIXSCam-specific parameters; 
+        this information is provided with the camera system
+    </p>
+    <h2 id="StandardNotes" style="text-align: left">
+        Implementation of standard driver parameters
+    </h2>
+    <p>
+        The following table describes how the RIXSCam driver implements some of the standard
+        driver parameters.
+    </p>
+    <table border="1" cellpadding="2" cellspacing="2" style="text-align: left">
+        <tbody>
+            <tr>
+                <td align="center" colspan="3">
+                    <b>
+                        Implementation of Parameters in asynNDArrayDriver.h and ADDriver.h, and EPICS Record
+                        Definitions in ADBase.template and NDFile.template
+                    </b>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    EPICS record name
+                </th>
+                <th>
+                    Description
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)TriggerMode<br />
+                    $(P)$(R)TriggerMode_RBV
+                </td>
+                <td>
+                    Sets the trigger mode for the detector. Options for the RIXSCam are:
+                    <ul>
+                        <li>External</li>
+                        <li>External: Delayed Readout</li>
+                        <li>External: CCD Dump</li>
+                        <li>Free Run</li>
+                        <li>Free Run: Delayed Readout</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)DataType_RBV
+                </td>
+                <td>
+                    The data type for the image data, which is fixed as UInt32 and therefore read only for this driver.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)ColorMode_RBV
+                </td>
+                <td>
+                    Color mode of the image data, which is fixed as NDColorModeMono and therefore read only for this driver.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)Temperature<br />
+                    $(P)$(R)Temperature_RBV
+                </td>
+                <td>
+                    Sets the setpoint temperature of the sensors.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)TemperatureActual
+                </td>
+                <td>
+                    Reads the actual temperature of the sensors.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h2 id="Driver_parameters" style="text-align: left">
+        RIXSCam-specific parameters
+    </h2>
+    <p>
+        The RIXSCam driver implements the following parameters in addition to those in asynNDArrayDriver.h
+        and ADDriver.h.
+    </p>
+    <table border="1" cellpadding="2" cellspacing="2" style="text-align: left">
+        <tbody>
+            <tr>
+                <td align="center" colspan="7">
+                    <b>(EPICS Record Definitions in PVDefinitions.template)</b>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Access
+                </th>
+                <th>
+                    Description
+                </th>
+                <th>
+                    drvInfo string
+                </th>
+                <th>
+                    EPICS record name
+                </th>
+                <th>
+                    EPICS record type
+                </th>
+            </tr>
+            <!-- Insert record definitions here -->
+        </tbody>
+    </table>
+    <h2 id="Unsupported" style="text-align: left">
+        Unsupported standard driver parameters
+    </h2>
+    <p>
+        ReverseX and ReverseY are currently not supported.
+    </p>
+    <h2 id="Usage" style="text-align: left">
+        Usage
+    </h2>
+    <p>
+        If any of the parameters set are out of range the driver will set them to the minimum
+        or maximum allowed value for that parameter. The _RBV value will indicate the actual
+        value in effect.
+    </p>
+    <h2 id="Configuration">
+        Configuration
+    </h2>
+    <p>
+        The RIXSCam driver is created with the xcamCameraConfig command
+        from the EPICS IOC shell.
+    </p>
+    <pre>int xcamCameraConfig(const char *portName, int maxSizeX, int maxSizeY,
+	int maxBuffers, size_t maxMemory, int priority, int stackSize)
+  </pre>
+    <p>
+        <ul>
+            <li>
+                portName	Asyn port name to assign to the camera driver.
+            </li>
+            <li>
+                maxSizeX	The maximum size of the image array, x direction, in pixels
+            </li>
+            <li>
+                maxSizeY	The maximum size of the image array, y direction, in pixels
+            </li>
+            <li>
+                maxBuffers	Maxiumum number of NDArray objects (image buffers) this driver is allowed to allocate. This driver requires 2 buffers, and each queue element in a plugin can require one buffer which will all need to be added up in this parameter. Use -1 for unlimited.
+            </li>
+            <li>
+                maxMemory	Maximum memory (in bytes) that this driver is allowed to allocate. Use -1 for unlimited.
+            </li>
+            <li>
+                priority	The EPICS thread priority for this asyn port driver. 0=use asyn default.
+            </li>
+            <li>
+                stackSize	The size of the stack for the asyn port thread. 0=use asyn default.
+            </li>
+        </ul>
+        Note that no 'camera id' can be provided.  Only a single camera (albeit with multiple sensors) can be accommodated on a single host computer.
+    </p>
+    <p>
+        There an example IOC boot directory and startup script st.cmd provided.
+    </p>
+    <h2 id="OPI_screens" style="text-align: left">
+        OPI screens
+    </h2>
+    <p>
+        The following shows the CSS-BOY screens that are used to control the RIXSCam.
+    </p>
+    <p>
+        <code>RIXSCam.opi</code> is the main screen used to control the RIXSCam driver - 
+        the 'equipment' panel.
+        Note that the general purpose screen ADBase.opi can be used as an alternative,
+        but the specific menu items that are releavant to the RIXSCam driver are of course
+        absent from it.
+    </p>
+    <div style="text-align: center">
+        <h3 style="text-align: center">
+            RIXSCam.opi
+        </h3>
+        <img alt="RIXSCam.png" src="RIXSCam.png" />
+    </div>
+    <p>
+        <code>RIXSCamSetup.opi</code> is the screen used to control less commonly-adjusted features of the RIXSCam driver -
+        the 'engineering panel'.
+    </p>
+    <div style="text-align: center">
+        <h3 style="text-align: center">
+            RIXSCamSetup.opi
+        </h3>
+        <img alt="RIXSCamSetup.png" src="RIXSCamSetup.png" />
+    </div>
+    <p>
+        <code>RIXSCamTemperatureController.opi</code> is the screen used to control the behaviour of the temperature controller.
+        It is accessible via the 'engineering panel'.
+    </p>
+    <div style="text-align: center">
+        <h3 style="text-align: center">
+            RIXSCamTemperatureController.opi
+        </h3>
+        <img alt="RIXSCamTemperatureController.png" src="RIXSCamTemperatureController.png" />
+    </div>
+    <h2 id="Restrictions" style="text-align: left">
+        Restrictions
+    </h2>
+    <p>
+        None
+    </p>
+</body>
+</html>

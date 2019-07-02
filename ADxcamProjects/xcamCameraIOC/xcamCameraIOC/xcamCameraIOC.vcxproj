@@ -1,0 +1,416 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugEmulate|Win32">
+      <Configuration>DebugEmulate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugEmulate|x64">
+      <Configuration>DebugEmulate</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseEmulate|Win32">
+      <Configuration>ReleaseEmulate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseEmulate|x64">
+      <Configuration>ReleaseEmulate</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B9D01CB7-7043-4F3A-90A2-FE058B7FE85E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>xcamCameraIOC</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugEmulate|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;C:\Development\Clients\XCAM\RIXS\RIXSDll\RIXSdll\XIP.lib;C:\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcamProjects\xcamCameraIOC\x64\Release\xcamRIXSPlugin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEmulate|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>\Development\Clients\XCAM\EPICS\base\include;\Development\Clients\XCAM\EPICS\base\include\os\WIN32;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\include;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\include;C:\Program Files (x86)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADCore\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\asyn-4-26\lib\windows-x64;\Development\Clients\XCAM\EPICS\base\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\calc-3-4-2-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\busy-1-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\devIocStats-3-1-13\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\sscan-2-10-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\autosave-5-6-1\lib\windows-x64;\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\seq-2-2-snapshot-2015-05-27\lib\windows-x64;C:\Program Files (x86)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>recIoc.lib;miscIoc.lib;NDPlugin.lib;ADBase.lib;calc.lib;busy.lib;asyn.lib;Com.lib;sscan.lib;autosave.lib;devIocstats.lib;softDevIoc.lib;dbToolsIoc.lib;dbstaticIoc.lib;asIoc.lib;registryIoc.lib;;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy RIXSCamPVDefinitions.template \Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcam\db</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\xcamRIXSPlugin\xcamRIXSPlugin\xcamRIXSPlugin.vcxproj">
+      <Project>{7c6ff852-623d-4662-94aa-6195a5caf147}</Project>
+      <Private>true</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\xcamCameraDriver\xcamCameraDriver.vcxproj">
+      <Project>{8d340342-c94a-471c-953e-a79b9f80d77b}</Project>
+      <Private>true</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\ADxcam\iocs\xcamCameraIOC\xcamCameraApp\src\O.windows-x64\xcamCameraApp_registerRecordDeviceDriver.cpp" />
+    <ClCompile Include="..\..\..\ADxcam\iocs\xcamCameraIOC\xcamCameraApp\src\xcamCameraAppMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\ADCore\db\NDPluginXIP.template" />
+    <None Include="..\..\..\ADxcam\db\RIXSCam.template" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\auto_settings.req" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\commonPluginsLocal.cmd" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\commonPluginsLocal_settings.req" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\envpaths.windows" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\sseq_settings.req" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\st.cmd" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\st.cmd.windows.phil" />
+    <None Include="..\..\..\ADxcam\iocs\xcamCameraIOC\iocBoot\iocXcamCamera\start_epics_phil.bat" />
+    <None Include="..\..\Setup\RIXSCamIOC.iss" />
+    <None Include="..\..\Setup\Startup\Target\envpaths.windows" />
+    <None Include="DocTemplate.html" />
+    <None Include="Parameters.csv" />
+    <None Include="Parameters.xlsx" />
+    <None Include="RIXSCam.req" />
+    <None Include="RIXSCamPVDefinitions.template" />
+    <None Include="start_user_interface.bat" />
+    <None Include="start_user_interface_BOY.bat" />
+    <None Include="Doc.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="RIXSCam.png" />
+    <Image Include="RIXSCamSetup.png" />
+    <Image Include="RIXSCamTemperatureController.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="xcamCameraIOC.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

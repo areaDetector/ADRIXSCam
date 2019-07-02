@@ -1,0 +1,1091 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>RIXSCam EPICS areaDetector driver</title>
+    <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type" />
+</head>
+<body>
+    <div style="text-align: center">
+        <h1>
+            RIXSCam EPICS areaDetector driver
+        </h1>
+        <h2>
+            February 2016
+        </h2>
+        <h2>
+            XCAM Ltd.
+        </h2>
+    </div>
+    <h2>
+        Table of Contents
+    </h2>
+    <ul>
+        <li><a href="#Introduction">Introduction</a></li>
+        <li><a href="#StandardNotes">Implementation of standard driver parameters</a></li>
+        <li><a href="#Driver_parameters">RIXSCam-specific parameters</a></li>
+        <li><a href="#Unsupported">Unsupported standard driver parameters</a></li>
+        <li><a href="#Usage">Usage</a></li>
+        <li><a href="#Configuration">Configuration</a></li>
+        <li><a href="#OPI_screens">OPI screens</a></li>
+        <li><a href="#Restrictions">Restrictions</a> </li>
+    </ul>
+    <h2 id="Introduction" style="text-align: left">
+        Introduction
+    </h2>
+    <p>
+        This is an <a href="http://www.aps.anl.gov/epics">EPICS</a> <a href="areaDetector.html">
+            areaDetector
+        </a> driver for RIXSCam cameras from <a href="http://www.xcam.co.uk">
+            XCAM Ltd.
+        </a>.  The driver is supported on 64-bit Windows only. 
+    </p>
+    <p>
+        The driver provides access to essentially all of the features of the RIXSCam.
+    </p>
+    <ul>
+        <li>Fixed number of frames or continuous acquisition.</li>
+        <li>Adjustable voltage and clock settings</li>
+        <li>Support for different trigger modes</li>
+        <li>Binning and Area Of Interest (AOI) readout</li>
+        <li>Set and monitor the camera temperature</li>
+    </ul>
+    <p>
+        This driver inherits from <a href="areaDetectorDoc.html#ADDriver">ADDriver</a>.
+        It implements many of the parameters in <a href="areaDetectorDoxygenHTML/asyn_n_d_array_driver_8h.html">
+            asynNDArrayDriver.h
+        </a> and in <a href="areaDetectorDoxygenHTML/_a_d_driver_8h.html">
+            ADArrayDriver.h
+        </a>. It also implements a number of parameters that are specific
+        to the RIXSCam.
+    </p>
+    <p>
+        This document does not attempt to explain the meaning of the RIXSCam-specific parameters; 
+        this information is provided with the camera system
+    </p>
+    <h2 id="StandardNotes" style="text-align: left">
+        Implementation of standard driver parameters
+    </h2>
+    <p>
+        The following table describes how the RIXSCam driver implements some of the standard
+        driver parameters.
+    </p>
+    <table border="1" cellpadding="2" cellspacing="2" style="text-align: left">
+        <tbody>
+            <tr>
+                <td align="center" colspan="3">
+                    <b>
+                        Implementation of Parameters in asynNDArrayDriver.h and ADDriver.h, and EPICS Record
+                        Definitions in ADBase.template and NDFile.template
+                    </b>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    EPICS record name
+                </th>
+                <th>
+                    Description
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)TriggerMode<br />
+                    $(P)$(R)TriggerMode_RBV
+                </td>
+                <td>
+                    Sets the trigger mode for the detector. Options for the RIXSCam are:
+                    <ul>
+                        <li>External</li>
+                        <li>External: Delayed Readout</li>
+                        <li>External: CCD Dump</li>
+                        <li>Free Run</li>
+                        <li>Free Run: Delayed Readout</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)DataType_RBV
+                </td>
+                <td>
+                    The data type for the image data, which is fixed as UInt32 and therefore read only for this driver.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)ColorMode_RBV
+                </td>
+                <td>
+                    Color mode of the image data, which is fixed as NDColorModeMono and therefore read only for this driver.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)Temperature<br />
+                    $(P)$(R)Temperature_RBV
+                </td>
+                <td>
+                    Sets the setpoint temperature of the sensors.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    $(P)$(R)TemperatureActual
+                </td>
+                <td>
+                    Reads the actual temperature of the sensors.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h2 id="Driver_parameters" style="text-align: left">
+        RIXSCam-specific parameters
+    </h2>
+    <p>
+        The RIXSCam driver implements the following parameters in addition to those in asynNDArrayDriver.h
+        and ADDriver.h.
+    </p>
+    <table border="1" cellpadding="2" cellspacing="2" style="text-align: left">
+        <tbody>
+            <tr>
+                <td align="center" colspan="7">
+                    <b>(EPICS Record Definitions in PVDefinitions.template)</b>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Access
+                </th>
+                <th>
+                    Description
+                </th>
+                <th>
+                    drvInfo string
+                </th>
+                <th>
+                    EPICS record name
+                </th>
+                <th>
+                    EPICS record type
+                </th>
+            </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               ADC Delay (Delay Before Clamp)
+            </td>
+            <td>
+               SEQ_ADC_DELAY
+            </td>
+            <td>
+               $(P)$(R)SEQ_ADC_DELAY<br />$(P)$(R)SEQ_ADC_DELAY_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Int- Delay (ADC Delay Before Reset Sample)
+            </td>
+            <td>
+               SEQ_INT_MINUS_DELAY
+            </td>
+            <td>
+               $(P)$(R)SEQ_INT_MINUS_DELAY<br />$(P)$(R)SEQ_INT_MINUS_DELAY_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Int+ Delay (ADC Delay Before Signal Sample)
+            </td>
+            <td>
+               SEQ_INT_PLUS_DELAY
+            </td>
+            <td>
+               $(P)$(R)SEQ_INT_PLUS_DELAY<br />$(P)$(R)SEQ_INT_PLUS_DELAY_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Int Time
+            </td>
+            <td>
+               SEQ_INT_TIME
+            </td>
+            <td>
+               $(P)$(R)SEQ_INT_TIME<br />$(P)$(R)SEQ_INT_TIME_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Serial T  (Serial Clock Delay)
+            </td>
+            <td>
+               SEQ_SERIAL_T
+            </td>
+            <td>
+               $(P)$(R)SEQ_SERIAL_T<br />$(P)$(R)SEQ_SERIAL_T_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Parallel T (Parallel Clock Delay)
+            </td>
+            <td>
+               SEQ_PARALLEL_T
+            </td>
+            <td>
+               $(P)$(R)SEQ_PARALLEL_T<br />$(P)$(R)SEQ_PARALLEL_T_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Serial Clock Direction
+            </td>
+            <td>
+               SEQ_SERIAL_CLOCK
+            </td>
+            <td>
+               $(P)$(R)SEQ_SERIAL_CLOCK<br />$(P)$(R)SEQ_SERIAL_CLOCK_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Parallel Clock Direction
+            </td>
+            <td>
+               SEQ_PARALLEL_CLOCK
+            </td>
+            <td>
+               $(P)$(R)SEQ_PARALLEL_CLOCK<br />$(P)$(R)SEQ_PARALLEL_CLOCK_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               The Node Readout Configuration
+            </td>
+            <td>
+               SEQ_NODE_SELECTION
+            </td>
+            <td>
+               $(P)$(R)SEQ_NODE_SELECTION<br />$(P)$(R)SEQ_NODE_SELECTION_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/o
+            </td>
+            <td>
+               Read Out = 0; Integrate = 1 (Read Only Parameter)
+            </td>
+            <td>
+               SEQ_STATUS
+            </td>
+            <td>
+               $(P)$(R)SEQ_STATUS
+            </td>
+            <td>
+               mbbi
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vod
+            </td>
+            <td>
+               VOLT_BIAS_OD_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_OD_$(CCD)<br />$(P)$(R)VOLT_BIAS_OD_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vrd
+            </td>
+            <td>
+               VOLT_BIAS_RD_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_RD_$(CCD)<br />$(P)$(R)VOLT_BIAS_RD_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vdd
+            </td>
+            <td>
+               VOLT_BIAS_DD_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_DD_$(CCD)<br />$(P)$(R)VOLT_BIAS_DD_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vog
+            </td>
+            <td>
+               VOLT_BIAS_OG_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_OG_$(CCD)<br />$(P)$(R)VOLT_BIAS_OG_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vss
+            </td>
+            <td>
+               VOLT_BIAS_SS_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_SS_$(CCD)<br />$(P)$(R)VOLT_BIAS_SS_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               HV-DC
+            </td>
+            <td>
+               VOLT_BIAS_HVDC_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_HVDC_$(CCD)<br />$(P)$(R)VOLT_BIAS_HVDC_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vpedestal
+            </td>
+            <td>
+               VOLT_BIAS_PEDESTAL_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_PEDESTAL_$(CCD)<br />$(P)$(R)VOLT_BIAS_PEDESTAL_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               VHV
+            </td>
+            <td>
+               VOLT_BIAS_HV_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_BIAS_HV_$(CCD)<br />$(P)$(R)VOLT_BIAS_HV_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vimage
+            </td>
+            <td>
+               VOLT_CLOCK_IMAGE_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_CLOCK_IMAGE_$(CCD)<br />$(P)$(R)VOLT_CLOCK_IMAGE_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vstore
+            </td>
+            <td>
+               VOLT_CLOCK_STORE_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_CLOCK_STORE_$(CCD)<br />$(P)$(R)VOLT_CLOCK_STORE_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vserial
+            </td>
+            <td>
+               VOLT_CLOCK_SERIAL_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_CLOCK_SERIAL_$(CCD)<br />$(P)$(R)VOLT_CLOCK_SERIAL_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Vreset
+            </td>
+            <td>
+               VOLT_CLOCK_RESET_$(CCD)
+            </td>
+            <td>
+               $(P)$(R)VOLT_CLOCK_RESET_$(CCD)<br />$(P)$(R)VOLT_CLOCK_RESET_$(CCD)_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               
+            </td>
+            <td>
+               CCD_POWER
+            </td>
+            <td>
+               $(P)$(R)CCD_POWER<br />$(P)$(R)CCD_POWER_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Sequencer filename
+            </td>
+            <td>
+               SEQ_FILENAME
+            </td>
+            <td>
+               $(P)$(R)SEQ_FILENAME<br />$(P)$(R)SEQ_FILENAME_RBV
+            </td>
+            <td>
+               stringin<br />stringout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/o
+            </td>
+            <td>
+               Software version of xcmclm
+            </td>
+            <td>
+               SOFT_VERSION
+            </td>
+            <td>
+               $(P)$(R)SOFT_VERSION
+            </td>
+            <td>
+               stringin
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/o
+            </td>
+            <td>
+               Version of interface software
+            </td>
+            <td>
+               IFS_VERSION
+            </td>
+            <td>
+               $(P)$(R)IFS_VERSION
+            </td>
+            <td>
+               stringin
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/o
+            </td>
+            <td>
+               Version of FPGA hardware
+            </td>
+            <td>
+               FPGA_VERSION
+            </td>
+            <td>
+               $(P)$(R)FPGA_VERSION
+            </td>
+            <td>
+               stringin
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/o
+            </td>
+            <td>
+               Camera serial number
+            </td>
+            <td>
+               CAM_SERIAL
+            </td>
+            <td>
+               $(P)$(R)CAM_SERIAL
+            </td>
+            <td>
+               stringin
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Camera/RIXS simulation mode
+            </td>
+            <td>
+               RIXS_SIMULATION
+            </td>
+            <td>
+               $(P)$(R)RIXS_SIMULATION<br />$(P)$(R)RIXS_SIMULATION_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Simulated events per frame
+            </td>
+            <td>
+               RIXS_EVENTSPERFRAME
+            </td>
+            <td>
+               $(P)$(R)RIXS_EVENTSPERFRAME<br />$(P)$(R)RIXS_EVENTSPERFRAME_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Simulated background
+            </td>
+            <td>
+               RIXS_BACKGROUNDLEVEL
+            </td>
+            <td>
+               $(P)$(R)RIXS_BACKGROUNDLEVEL<br />$(P)$(R)RIXS_BACKGROUNDLEVEL_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Simulated event amplitude
+            </td>
+            <td>
+               RIXS_EVENTHEIGHT
+            </td>
+            <td>
+               $(P)$(R)RIXS_EVENTHEIGHT<br />$(P)$(R)RIXS_EVENTHEIGHT_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Simulated event spread (pixels)
+            </td>
+            <td>
+               RIXS_EVENTRADIUS
+            </td>
+            <td>
+               $(P)$(R)RIXS_EVENTRADIUS<br />$(P)$(R)RIXS_EVENTRADIUS_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Proportional Gain
+            </td>
+            <td>
+               TEMP_PROP_GAIN
+            </td>
+            <td>
+               $(P)$(R)TEMP_PROP_GAIN<br />$(P)$(R)TEMP_PROP_GAIN_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Integral Gain
+            </td>
+            <td>
+               TEMP_INT_GAIN
+            </td>
+            <td>
+               $(P)$(R)TEMP_INT_GAIN<br />$(P)$(R)TEMP_INT_GAIN_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Derivative Gain
+            </td>
+            <td>
+               TEMP_DERIV_GAIN
+            </td>
+            <td>
+               $(P)$(R)TEMP_DERIV_GAIN<br />$(P)$(R)TEMP_DERIV_GAIN_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Proportional rate
+            </td>
+            <td>
+               TEMP_PROP_RATE
+            </td>
+            <td>
+               $(P)$(R)TEMP_PROP_RATE<br />$(P)$(R)TEMP_PROP_RATE_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Integral rate
+            </td>
+            <td>
+               TEMP_INT_RATE
+            </td>
+            <td>
+               $(P)$(R)TEMP_INT_RATE<br />$(P)$(R)TEMP_INT_RATE_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Derivative rate
+            </td>
+            <td>
+               TEMP_DERIV_RATE
+            </td>
+            <td>
+               $(P)$(R)TEMP_DERIV_RATE<br />$(P)$(R)TEMP_DERIV_RATE_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Accumulated Error Limit
+            </td>
+            <td>
+               TEMP_ACCUMULATED_ERROR_LIMIT
+            </td>
+            <td>
+               $(P)$(R)TEMP_ACCUMULATED_ERROR_LIMIT<br />$(P)$(R)TEMP_ACCUMULATED_ERROR_LIMIT_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Output Bias (Power Setting)
+            </td>
+            <td>
+               TEMP_OUTPUT_BIAS
+            </td>
+            <td>
+               $(P)$(R)TEMP_OUTPUT_BIAS<br />$(P)$(R)TEMP_OUTPUT_BIAS_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Operation mode
+            </td>
+            <td>
+               TEMP_MANUAL_MODE
+            </td>
+            <td>
+               $(P)$(R)TEMP_MANUAL_MODE<br />$(P)$(R)TEMP_MANUAL_MODE_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Enable
+            </td>
+            <td>
+               TEMP_ENABLE
+            </td>
+            <td>
+               $(P)$(R)TEMP_ENABLE<br />$(P)$(R)TEMP_ENABLE_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller Heater Select
+            </td>
+            <td>
+               TEMP_HEATER_SELECT
+            </td>
+            <td>
+               $(P)$(R)TEMP_HEATER_SELECT<br />$(P)$(R)TEMP_HEATER_SELECT_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               Temperature Controller PRT Select
+            </td>
+            <td>
+               TEMP_SENSOR_SELECT
+            </td>
+            <td>
+               $(P)$(R)TEMP_SENSOR_SELECT<br />$(P)$(R)TEMP_SENSOR_SELECT_RBV
+            </td>
+            <td>
+               mbbi<br />mbbo
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/o
+            </td>
+            <td>
+               The number of CCD interfaces discovered
+            </td>
+            <td>
+               CCD_COUNT
+            </td>
+            <td>
+               $(P)$(R)CCD_COUNT
+            </td>
+            <td>
+               longin
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               ADC Gain setting (dB)
+            </td>
+            <td>
+               ADC_GAIN
+            </td>
+            <td>
+               $(P)$(R)ADC_GAIN<br />$(P)$(R)ADC_GAIN_RBV
+            </td>
+            <td>
+               ai<br />ao
+            </td>
+         </tr>
+         <tr>
+            <td>
+               r/w
+            </td>
+            <td>
+               ADC Offset Setting
+            </td>
+            <td>
+               ADC_OFFSET
+            </td>
+            <td>
+               $(P)$(R)ADC_OFFSET<br />$(P)$(R)ADC_OFFSET_RBV
+            </td>
+            <td>
+               longin<br />longout
+            </td>
+         </tr>
+        </tbody>
+    </table>
+    <h2 id="Unsupported" style="text-align: left">
+        Unsupported standard driver parameters
+    </h2>
+    <p>
+        ReverseX and ReverseY are currently not supported.
+    </p>
+    <h2 id="Usage" style="text-align: left">
+        Usage
+    </h2>
+    <p>
+        If any of the parameters set are out of range the driver will set them to the minimum
+        or maximum allowed value for that parameter. The _RBV value will indicate the actual
+        value in effect.
+    </p>
+    <h2 id="Configuration">
+        Configuration
+    </h2>
+    <p>
+        The RIXSCam driver is created with the xcamCameraConfig command
+        from the EPICS IOC shell.
+    </p>
+    <pre>int xcamCameraConfig(const char *portName, int maxSizeX, int maxSizeY,
+	int maxBuffers, size_t maxMemory, int priority, int stackSize)
+  </pre>
+    <p>
+        <ul>
+            <li>
+                portName	Asyn port name to assign to the camera driver.
+            </li>
+            <li>
+                maxSizeX	The maximum size of the image array, x direction, in pixels
+            </li>
+            <li>
+                maxSizeY	The maximum size of the image array, y direction, in pixels
+            </li>
+            <li>
+                maxBuffers	Maxiumum number of NDArray objects (image buffers) this driver is allowed to allocate. This driver requires 2 buffers, and each queue element in a plugin can require one buffer which will all need to be added up in this parameter. Use -1 for unlimited.
+            </li>
+            <li>
+                maxMemory	Maximum memory (in bytes) that this driver is allowed to allocate. Use -1 for unlimited.
+            </li>
+            <li>
+                priority	The EPICS thread priority for this asyn port driver. 0=use asyn default.
+            </li>
+            <li>
+                stackSize	The size of the stack for the asyn port thread. 0=use asyn default.
+            </li>
+        </ul>
+        Note that no 'camera id' can be provided.  Only a single camera (albeit with multiple sensors) can be accommodated on a single host computer.
+    </p>
+    <p>
+        There an example IOC boot directory and startup script st.cmd provided.
+    </p>
+    <h2 id="OPI_screens" style="text-align: left">
+        OPI screens
+    </h2>
+    <p>
+        The following shows the CSS-BOY screens that are used to control the RIXSCam.
+    </p>
+    <p>
+        <code>RIXSCam.opi</code> is the main screen used to control the RIXSCam driver - 
+        the 'equipment' panel.
+        Note that the general purpose screen ADBase.opi can be used as an alternative,
+        but the specific menu items that are releavant to the RIXSCam driver are of course
+        absent from it.
+    </p>
+    <div style="text-align: center">
+        <h3 style="text-align: center">
+            RIXSCam.opi
+        </h3>
+        <img alt="RIXSCam.png" src="RIXSCam.png" />
+    </div>
+    <p>
+        <code>RIXSCamSetup.opi</code> is the screen used to control less commonly-adjusted features of the RIXSCam driver -
+        the 'engineering panel'.
+    </p>
+    <div style="text-align: center">
+        <h3 style="text-align: center">
+            RIXSCamSetup.opi
+        </h3>
+        <img alt="RIXSCamSetup.png" src="RIXSCamSetup.png" />
+    </div>
+    <p>
+        <code>RIXSCamTemperatureController.opi</code> is the screen used to control the behaviour of the temperature controller.
+        It is accessible via the 'engineering panel'.
+    </p>
+    <div style="text-align: center">
+        <h3 style="text-align: center">
+            RIXSCamTemperatureController.opi
+        </h3>
+        <img alt="RIXSCamTemperatureController.png" src="RIXSCamTemperatureController.png" />
+    </div>
+    <h2 id="Restrictions" style="text-align: left">
+        Restrictions
+    </h2>
+    <p>
+        None
+    </p>
+</body>
+</html>

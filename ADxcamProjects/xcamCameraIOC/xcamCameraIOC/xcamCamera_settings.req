@@ -1,0 +1,3 @@
+$(P)$(R)SEQ_FILENAME
+file "RIXSCam.req", P=$(P), R=$(R)
+file "ADBase_settings.req", P=$(P), R=$(R)

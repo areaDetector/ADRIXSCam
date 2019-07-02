@@ -1,0 +1,77 @@
+# Must have loaded envPaths via st.cmd.linux or st.cmd.win32
+
+errlogInit(20000)
+
+dbLoadDatabase("$(TOP)/dbd/xcamCameraApp.dbd")
+xcamCameraApp_registerRecordDeviceDriver(pdbbase) 
+
+# Prefix for all records
+epicsEnvSet("PREFIX", "RIXSCam1:")
+# The port name for the detector
+epicsEnvSet("PORT",   "Camera1")
+# The queue size for all plugins.  SET TO 1 SO THAT XIP BEHAVIOUR IS CORRECT
+epicsEnvSet("QSIZE",  "1")
+# The maximim image width; used for row profiles in the NDPluginStats plugin
+epicsEnvSet("XSIZE",  "1648")
+# The maximim image height; used for column profiles in the NDPluginStats plugin
+epicsEnvSet("YSIZE",  "1608")
+# The maximum number of time series points in the NDPluginStats plugin
+epicsEnvSet("NCHANS", "2048")
+# The maximum number of frames buffered in the NDPluginCircularBuff plugin
+epicsEnvSet("CBUFFS", "500")
+# The search path for database files
+epicsEnvSet("EPICS_DB_INCLUDE_PATH", "$(ADxcamDB);$(ADCORE)/db")
+
+asynSetMinTimerPeriod(0.001)
+
+# The EPICS environment variable EPICS_CA_MAX_ARRAY_BYTES needs to be set to a value at least as large
+# as the largest image that the standard arrays plugin will send.
+# That vlaue is $(XSIZE) * $(YSIZE) * sizeof(FTVL data type) for the FTVL used when loading the NDStdArrays.template file.
+# The variable can be set in the environment before running the IOC or it can be set here.
+# It is often convenient to set it in the environment outside the IOC to the largest array any client 
+# or server will need.  For example 10000000 (ten million) bytes may be enough.
+# If it is set here then remember to also set it outside the IOC for any CA clients that need to access the waveform record.  
+# Do not set EPICS_CA_MAX_ARRAY_BYTES to a value much larger than that required, because EPICS Channel Access actually
+# allocates arrays of this size every time it needs a buffer larger than 16K.
+# EPICS_CA_MAX_ARRAY_BYTES must be set a little larger (say, 100 bytes larger) than the CAPACITY of the NDArray created
+# below.  If it is big enough to contain the actual data but doesn't satisfy this rule, images will be displayable by ImageJ
+# but not by BOY's Intensity Graph widget.
+# Uncomment the following line to set it in the IOC.
+epicsEnvSet("EPICS_CA_MAX_ARRAY_BYTES", "8000100")
+
+# Create a RIXSCam driver
+# RIXSCamConfig(const char *portName, int maxSizeX, int maxSizeY,
+#                   int maxBuffers, int maxMemory, int priority, int stackSize)
+RIXSCamConfig("$(PORT)", $(XSIZE), $(YSIZE), 0, 0)
+dbLoadRecords("$(ADxcam)/db/RIXSCam.template","P=$(PREFIX),R=Camera1:,PORT=$(PORT),ADDR=0,TIMEOUT=1")
+
+# Create a standard arrays plugin, set it to get data from first RIXSCam driver.
+NDStdArraysConfigure("Image1", 3, 0, "$(PORT)", 0)
+
+# Create a waveform large enough for 2000x2000x1 arrays.
+# This waveform only allows transporting 16-bit images.  We use SHORT instead of USHORT because Channel Access does not support unsigned types
+dbLoadRecords("NDStdArrays.template", "P=$(PREFIX),R=image1:,PORT=Image1,ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT),TYPE=Int16,FTVL=SHORT,NELEMENTS=4000000")
+
+# Load all other plugins using commonPlugins.cmd
+< commonPluginsLocal.cmd
+
+# Load XIP plugin.  Specify BlockCallbacks to true, which is how it should stay.
+NDPluginXIPConfigure("XIP1", $(QSIZE), 1, "$(PORT)", 0, -1, -1)
+dbLoadRecords("NDPluginXIP.template", "P=$(PREFIX),R=XIP1:,  PORT=XIP1,ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT)")
+
+iocInit()
+
+# List the names of the PVs we're creating
+dbl > pvnames.txt
+dbgrep("$(PREFIX):XIP1:*") > pvXIP.txt
+dbgrep("$(PREFIX):$(PORT):*") > pvCam.txt
+
+# Display error log messages on console
+eltc(1)
+
+# save things every thirty seconds
+set_requestfile_path("$(ADxcamDb)")
+set_requestfile_path("$(ADxcam_RIXSCam_req)")
+set_requestfile_path("$(ADxcam_XIP_req)")
+create_monitor_set("auto_settings.req", 30, "P=$(PREFIX)")
+
