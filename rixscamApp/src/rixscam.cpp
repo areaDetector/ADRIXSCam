@@ -41,7 +41,7 @@ using namespace std;
 
 #include "ADDriver.h"
 #include <epicsExport.h>
-#include "xcamCamera.h"
+#include "rixscam.h"
 
 // Wrapper class for epicsMutex where destruction releases the mutex
 class MutexLocker
@@ -467,7 +467,7 @@ NDArray* xcamCamera::GetImage()
 			sizeX = maxSizeX - minX;
 			status |= setIntegerParam(ADSizeX, sizeX);
 		}
-		
+
 		// Special case for minY parameter. It also determines the switch point for dual node readout which cannot be windowed
 		// Only execute code below if we are reading out of the LS or HR node don't excute code if we are in dual node readout
 		if ((short)_paramSEQ_NODE_SELECTION.Value(*this) < 2)
@@ -486,7 +486,7 @@ NDArray* xcamCamera::GetImage()
 	{
 		if (_newImageRequired) {
 			/* Free the previous raw buffer */
-			if (this->pRaw) 
+			if (this->pRaw)
 				this->pRaw->release();
 			/* Allocate the raw buffer we use to compute images. */
 			size_t dims[2];
@@ -555,7 +555,7 @@ NDArray* xcamCamera::GetImage()
 			//if (_roiParametersChanged)
 			//{
 			// Set/get camera parameters
-			
+
 			callParamCallbacks();
 
 			/*
@@ -611,7 +611,7 @@ NDArray* xcamCamera::GetImage()
 				{
 					result = xcm_clm_set_param(_serialNumbers[0], param->InternalIndex(), (short)param->Value(*this));
 				}
-					
+
 				_SequencerParametersChanged = false;
 			}
 
@@ -686,7 +686,7 @@ NDArray* xcamCamera::GetImage()
 					dims[xDim] = imageSizeX;
 					dims[yDim] = imageSizeY;
 					_ccdImages[ccd] = pNDArrayPool->alloc(2, dims, NDUInt16, 0, NULL);
-			
+
 					// Set up the grab
 					// Note that sizeX and sizeY have to be passed twice, and reversed the second time!
 					// Also that the top/left are passed as zero; non-zero values would invoke a 'software'
@@ -694,7 +694,7 @@ NDArray* xcamCamera::GetImage()
 					result = xcm_clm_grab_setup_1node(_serialNumbers[ccd],
 						imageSizeX, imageSizeY, 0, 0, imageSizeY, imageSizeX, (BYTE*)_ccdImages[ccd]->pData,
 						(int)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
-			
+
 					/*
 					// Set the acquisition timeout to twice the integration time, plus 10 seconds
 					double acquireTime;
@@ -793,7 +793,7 @@ NDArray* xcamCamera::GetImage()
 			}
 		}
 
-		// pImageData points to final row 
+		// pImageData points to final row
 		memset((void *)pImageData, 0, dims[xDim] * sizeof(unsigned short));
 
 		// We do _not_ free the buffers for the individual CCDs here because their addresses have been passed
@@ -1149,14 +1149,14 @@ void xcamCamera::imageTask()
 		} // xcmclm mutex released here
 
 		if (!acquire) continue;
-		
+
 		setIntegerParam(ADStatus, ADStatusReadout);
 
 		/* Update the image */
 		NDArray* pImage = GetImage();
 
 		// Did something tell us to stop acquiring?
-		if (epicsEventWaitOK == epicsEventTryWait(this->stopEventId)) 
+		if (epicsEventWaitOK == epicsEventTryWait(this->stopEventId))
 		{
 			//asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
 			//	"%s:%s: Stop button pressed\n", _driverName, functionName);
@@ -1174,7 +1174,7 @@ void xcamCamera::imageTask()
 
 		/* Close the shutter */
 		setShutter(ADShutterClosed);
-		
+
 		/*
 		if (acquire)
 		{
@@ -1185,7 +1185,7 @@ void xcamCamera::imageTask()
 		*/
 
 		//setIntegerParam(ADStatus, ADStatusReadout);
-		
+
 		/* Call the callbacks to update any changes */
 		callParamCallbacks();
 
@@ -1357,7 +1357,7 @@ void xcamCamera::temperatureTask(void)
 	static const char *functionName = "temperatureTask";
 	static double tSim = 0.0;
 
-	while (!_exiting) 
+	while (!_exiting)
 	{
 		// Read the temperature once every 30 seconds
 		// Wait at the start, to give saveRestore time to establish the parameters
@@ -1411,12 +1411,12 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 	getIntegerParam(ADStatus, &adstatus);
 	getIntegerParam(ADAcquire, &acquiring);
 	getIntegerParam(ADImageMode, &imageMode);
-	if (function == ADAcquire) 
+	if (function == ADAcquire)
 	{
 		//asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
 		//	"Value = %i; acquiring = %i: \n", value, acquiring);
 
-		if (value && !acquiring) 
+		if (value && !acquiring)
 		{
 			if (_grabWaitFlag)
 			{
@@ -1425,17 +1425,17 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 			}
 			setStringParam(ADStatusMessage, "Acquiring data");
 		}
-		if (!value && acquiring) 
+		if (!value && acquiring)
 		{
 			//asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
 			//	":: Stop event\n");
 
 			setStringParam(ADStatusMessage, "Acquisition stopped");
-			if (imageMode == ADImageContinuous) 
+			if (imageMode == ADImageContinuous)
 			{
 				setIntegerParam(ADStatus, ADStatusIdle);
 			}
-			else 
+			else
 			{
 				setIntegerParam(ADStatus, ADStatusAborted);
 			}
@@ -1474,7 +1474,7 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 	callParamCallbacks();
 
 	// Set the parameter and readback in the parameter library.  This may be overwritten when we read back the
-	// status at the end, but that's OK 
+	// status at the end, but that's OK
 	asynStatus status = setIntegerParam(function, value);
 
 	// If the function refers to an ROI parameter, note it
@@ -1496,23 +1496,23 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 	_adcGainOffsetChanged |= _paramADC_GAIN.HasParameterIndex(function);
 	_adcGainOffsetChanged |= _paramADC_OFFSET.HasParameterIndex(function);
-	
-	if (function == ADAcquire) 
+
+	if (function == ADAcquire)
 	{
-		if (value && !acquiring) 
+		if (value && !acquiring)
 		{
 			/* Send an event to wake up the simulation task.
 			 * It won't actually start generating new images until we release the lock below */
 			epicsEventSignal(this->startEventId);
 		}
-		if (!value && acquiring) 
+		if (!value && acquiring)
 		{
 			/* This was a command to stop acquisition */
 			/* Send the stop event */
 			epicsEventSignal(this->stopEventId);
 		}
 	}
-	else 
+	else
 	{
 		/* If this parameter belongs to a base class call its method */
 		if (function < FIRST_XCAM_CAMERA_PARAM) status = ADDriver::writeInt32(pasynUser, value);
@@ -1557,7 +1557,7 @@ asynStatus xcamCamera::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 	{
 		_adcGainOffsetChanged = true;
 	}
-	
+
 	else if (function == ADShutterCloseDelay)
 	{
 		_shutterDelayChanged = true;
