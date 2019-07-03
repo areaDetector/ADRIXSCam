@@ -328,8 +328,8 @@ protected:
 	std::vector<Parameter<T>> _parameters;
 };
 
+// RIXSCAM
 
-/** Simulation detector driver; demonstrates most of the features that areaDetector drivers can support. */
 class epicsShareClass xcamCamera : public ADDriver {
 public:
     xcamCamera(const char *portName, int maxSizeX, int maxSizeY,
@@ -380,7 +380,56 @@ private:
 	std::vector<int> _serialNumbers;
 	vector<NDArray*> _ccdImages;
 
-#include "\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcamProjects\xcamCameraIOC\xcamCameraIOC\PVDeclarations.h"
+    // Included from PVDeclarations.h
+    const static int _ccdCountMax = 3;
+    Parameter<epicsInt32> _paramSEQ_ADC_DELAY{"SEQ_ADC_DELAY", 0, 1, 65535, 144};
+    Parameter<epicsInt32> _paramSEQ_INT_MINUS_DELAY{"SEQ_INT_MINUS_DELAY", 1, 1, 65535, 3};
+    Parameter<epicsInt32> _paramSEQ_INT_PLUS_DELAY{"SEQ_INT_PLUS_DELAY", 2, 1, 65535, 3};
+    Parameter<epicsInt32> _paramSEQ_INT_TIME{"SEQ_INT_TIME", 3, 1, 65535, 50};
+    Parameter<epicsInt32> _paramSEQ_SERIAL_T{"SEQ_SERIAL_T", 4, 1, 65535, 1};
+    Parameter<epicsInt32> _paramSEQ_PARALLEL_T{"SEQ_PARALLEL_T", 5, 1, 65535, 255};
+    Parameter<epicsInt32> _paramSEQ_SERIAL_CLOCK{"SEQ_SERIAL_CLOCK", 7, 0, 0, 0};
+    Parameter<epicsInt32> _paramSEQ_PARALLEL_CLOCK{"SEQ_PARALLEL_CLOCK", 8, 0, 1, 0};
+    Parameter<epicsInt32> _paramSEQ_NODE_SELECTION{"SEQ_NODE_SELECTION", 13, 0, 3, 0};
+    ReadOnlyParameter<epicsInt32> _paramSEQ_STATUS{"SEQ_STATUS", 68};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_OD{"VOLT_BIAS_OD", 4, 0, 33.915, 0, 0.133};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_RD{"VOLT_BIAS_RD", 5, 0, 23.97, 0, 0.094};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_DD{"VOLT_BIAS_DD", 6, 0, 23.97, 0, 0.094};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_OG{"VOLT_BIAS_OG", 7, 0, 23.97, 0, 0.094};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_SS{"VOLT_BIAS_SS", 9, 0, 23.97, 0, 0.094};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_HVDC{"VOLT_BIAS_HVDC", 8, 0, 23.97, 0, 0.094};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_PEDESTAL{"VOLT_BIAS_PEDESTAL", 10, 0, 14.025, 0, 0.055};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_BIAS_HV{"VOLT_BIAS_HV", 11, 0, 49.98, 0, 0.196};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_CLOCK_IMAGE{"VOLT_CLOCK_IMAGE", 0, 0, 14.025, 0, 0.055};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_CLOCK_STORE{"VOLT_CLOCK_STORE", 1, 0, 14.025, 0, 0.055};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_CLOCK_SERIAL{"VOLT_CLOCK_SERIAL", 2, 0, 14.025, 0, 0.055};
+    MultiParameter<_ccdCountMax, epicsFloat64> _paramVOLT_CLOCK_RESET{"VOLT_CLOCK_RESET", 3, 0, 14.025, 0, 0.055};
+    Parameter<epicsInt32> _paramCCD_POWER{"CCD_POWER", 0, 0, 1, 0};
+    Parameter<epicsInt32> _paramRIXS_SIMULATION{"RIXS_SIMULATION", 0, 0, 1, 0};
+    Parameter<epicsInt32> _paramRIXS_EVENTSPERFRAME{"RIXS_EVENTSPERFRAME", 0, 0, 10000, 100};
+    Parameter<epicsInt32> _paramRIXS_BACKGROUNDLEVEL{"RIXS_BACKGROUNDLEVEL", 0, 0, 65535, 0};
+    Parameter<epicsFloat64> _paramRIXS_EVENTHEIGHT{"RIXS_EVENTHEIGHT", 0, 0, 65535, 200};
+    Parameter<epicsFloat64> _paramRIXS_EVENTRADIUS{"RIXS_EVENTRADIUS", 0, 0.001, 2, 1};
+    Parameter<epicsInt32> _paramTEMP_PROP_GAIN{"TEMP_PROP_GAIN", 4, 0, 255, 0};
+    Parameter<epicsInt32> _paramTEMP_INT_GAIN{"TEMP_INT_GAIN", 6, 0, 255, 0};
+    Parameter<epicsInt32> _paramTEMP_DERIV_GAIN{"TEMP_DERIV_GAIN", 8, 0, 255, 0};
+    Parameter<epicsInt32> _paramTEMP_PROP_RATE{"TEMP_PROP_RATE", 10, 0, 65535, 0};
+    Parameter<epicsInt32> _paramTEMP_INT_RATE{"TEMP_INT_RATE", 12, 0, 65535, 0};
+    Parameter<epicsInt32> _paramTEMP_DERIV_RATE{"TEMP_DERIV_RATE", 14, 0, 65535, 0};
+    Parameter<epicsInt32> _paramTEMP_ACCUMULATED_ERROR_LIMIT{"TEMP_ACCUMULATED_ERROR_LIMIT", 16, 0, 16777215, 0};
+    Parameter<epicsInt32> _paramTEMP_OUTPUT_BIAS{"TEMP_OUTPUT_BIAS", 18, 0, 65535, 0};
+    Parameter<epicsInt32> _paramTEMP_MANUAL_MODE{"TEMP_MANUAL_MODE", 19, 0, 1, 1};
+    Parameter<epicsInt32> _paramTEMP_ENABLE{"TEMP_ENABLE", 20, 0, 1, 1};
+    Parameter<epicsInt32> _paramTEMP_HEATER_SELECT{"TEMP_HEATER_SELECT", 0, 0, 1, 0};
+    Parameter<epicsInt32> _paramTEMP_SENSOR_SELECT{"TEMP_SENSOR_SELECT", 0, 0, 1, 0};
+    ReadOnlyParameter<epicsInt32> _paramCCD_COUNT{"CCD_COUNT", 0};
+    Parameter<epicsFloat64> _paramADC_GAIN{"ADC_GAIN", 0, 0, 36.1119, 10, 0.0353};
+    Parameter<epicsInt32> _paramADC_OFFSET{"ADC_OFFSET", 0, 0, 1020, 40, 4};
+
+    const static int _parameterContainerCount = 43;
+    const static int _parameterCount = 67;
+
+    std::vector<ParameterBase*> _allParams;
 
 	bool _ccdPowerOn;
 	bool _CCDPowerChanged;
