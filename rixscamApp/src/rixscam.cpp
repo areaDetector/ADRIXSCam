@@ -171,8 +171,55 @@ xcamCamera::xcamCamera(const char *portName, int maxSizeX, int maxSizeY,
 	setStringParam(CamSerial, "Unknown");
 	createParam("SEQ_FILENAME", asynParamOctet, &SeqFilename);
 
-	// File to build _allParams collection, which is written by PVGenerator
-#include "\Development\Clients\XCAM\EPICS\synApps\synApps_5_8\support\areaDetector-R2-4\ADxcamProjects\xcamCameraIOC\xcamCameraIOC\PVDefinitions.cpp"
+    // Origionally included from file written by PVGenerator.
+    // Coppied into file by S.B. Wilkins
+    // from "xcamCameraIOC\PVDefinitions.cpp"
+
+    _allParams = {
+        &_paramSEQ_ADC_DELAY,
+        &_paramSEQ_INT_MINUS_DELAY,
+        &_paramSEQ_INT_PLUS_DELAY,
+        &_paramSEQ_INT_TIME,
+        &_paramSEQ_SERIAL_T,
+        &_paramSEQ_PARALLEL_T,
+        &_paramSEQ_SERIAL_CLOCK,
+        &_paramSEQ_PARALLEL_CLOCK,
+        &_paramSEQ_NODE_SELECTION,
+        &_paramSEQ_STATUS,
+        &_paramVOLT_BIAS_OD,
+        &_paramVOLT_BIAS_RD,
+        &_paramVOLT_BIAS_DD,
+        &_paramVOLT_BIAS_OG,
+        &_paramVOLT_BIAS_SS,
+        &_paramVOLT_BIAS_HVDC,
+        &_paramVOLT_BIAS_PEDESTAL,
+        &_paramVOLT_BIAS_HV,
+        &_paramVOLT_CLOCK_IMAGE,
+        &_paramVOLT_CLOCK_STORE,
+        &_paramVOLT_CLOCK_SERIAL,
+        &_paramVOLT_CLOCK_RESET,
+        &_paramCCD_POWER,
+        &_paramRIXS_SIMULATION,
+        &_paramRIXS_EVENTSPERFRAME,
+        &_paramRIXS_BACKGROUNDLEVEL,
+        &_paramRIXS_EVENTHEIGHT,
+        &_paramRIXS_EVENTRADIUS,
+        &_paramTEMP_PROP_GAIN,
+        &_paramTEMP_INT_GAIN,
+        &_paramTEMP_DERIV_GAIN,
+        &_paramTEMP_PROP_RATE,
+        &_paramTEMP_INT_RATE,
+        &_paramTEMP_DERIV_RATE,
+        &_paramTEMP_ACCUMULATED_ERROR_LIMIT,
+        &_paramTEMP_OUTPUT_BIAS,
+        &_paramTEMP_MANUAL_MODE,
+        &_paramTEMP_ENABLE,
+        &_paramTEMP_HEATER_SELECT,
+        &_paramTEMP_SENSOR_SELECT,
+        &_paramCCD_COUNT,
+        &_paramADC_GAIN,
+        &_paramADC_OFFSET,
+    };
 
 	for (auto param : _allParams)
 		status |= param->Initialize(*this);
