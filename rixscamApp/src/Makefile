@@ -12,12 +12,12 @@ ifeq (vxWorks,$(findstring vxWorks, $(T_A)))
 CODE_CXXFLAGS=
 endif
 
-INC += xcamCamera.h
+INC += rixscam.h
 
-LIBRARY_IOC = xcamCamera
-LIB_SRCS += xcamCamera.cpp
+LIBRARY_IOC = rixscam
+LIB_SRCS += rixscam.cpp
 
-DBD += xcamCameraSupport.dbd
+DBD += rixscamSupport.dbd
 
 include $(ADCORE)/ADApp/commonLibraryMakefile
 
