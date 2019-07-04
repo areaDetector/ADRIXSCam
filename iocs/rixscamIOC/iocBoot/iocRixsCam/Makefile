@@ -8,5 +8,5 @@ ARCH = windows-x64-static
 #ARCH = linux-x86_64
 #ARCH = solaris-sparc
 #ARCH = vxWorks-ppc603
-TARGETS = envPaths cdCommands dllPath.bat
+TARGETS = envPaths dllPath.bat
 include $(TOP)/configure/RULES.ioc

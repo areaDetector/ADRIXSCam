@@ -64,5 +64,6 @@ iocInit()
 eltc(1)
 
 # save things every thirty seconds
+set_requestfile_path(".")
 create_monitor_set("auto_settings.req", 30, "P=$(PREFIX)")
 
