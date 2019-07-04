@@ -13,7 +13,6 @@ include $(TOP)/configure/CONFIG
 
 #DB += xcamCamera.template
 DB += RIXSCam.template
-DB += RIXSCamPVDefinitions.template
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
