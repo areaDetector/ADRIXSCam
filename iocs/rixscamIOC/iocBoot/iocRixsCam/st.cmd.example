@@ -8,7 +8,7 @@ rixscamApp_registerRecordDeviceDriver(pdbbase)
 # Prefix for all records
 epicsEnvSet("PREFIX", "RIXSCam1:")
 # The port name for the detector
-epicsEnvSet("PORT",   "Camera1")
+epicsEnvSet("PORT",   "RIXSCAM1")
 # The queue size for all plugins.  SET TO 1 SO THAT XIP BEHAVIOUR IS CORRECT
 epicsEnvSet("QSIZE",  "1")
 # The maximim image width; used for row profiles in the NDPluginStats plugin
@@ -20,7 +20,7 @@ epicsEnvSet("NCHANS", "2048")
 # The maximum number of frames buffered in the NDPluginCircularBuff plugin
 epicsEnvSet("CBUFFS", "500")
 # The search path for database files
-epicsEnvSet("EPICS_DB_INCLUDE_PATH", "$(ADXCAMDB);$(ADCORE)/db")
+epicsEnvSet("EPICS_DB_INCLUDE_PATH", "$(ADCORE)/db")
 
 asynSetMinTimerPeriod(0.001)
 
@@ -43,7 +43,7 @@ epicsEnvSet("EPICS_CA_MAX_ARRAY_BYTES", "8000100")
 # RIXSCamConfig(const char *portName, int maxSizeX, int maxSizeY,
 #                   int maxBuffers, int maxMemory, int priority, int stackSize)
 RIXSCamConfig("$(PORT)", $(XSIZE), $(YSIZE), 0, 0)
-dbLoadRecords("$(ADXCAM)/db/RIXSCam.template","P=$(PREFIX),R=Camera1:,PORT=$(PORT),ADDR=0,TIMEOUT=1")
+dbLoadRecords("$(ADXCAM)/db/RIXSCam.template","P=$(PREFIX),R=cam1:,PORT=$(PORT),ADDR=0,TIMEOUT=1")
 
 # Create a standard arrays plugin, set it to get data from first RIXSCam driver.
 NDStdArraysConfigure("Image1", 3, 0, "$(PORT)", 0)
