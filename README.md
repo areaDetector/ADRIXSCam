@@ -1,7 +1,10 @@
 ADRIXSCam
 =========
 
-EPICS areaDetector driver for the XCAM RIXSCAM.
+An
+[EPICS](http://www.aps.anl.gov/epics/) 
+[areaDetector](https://areadetector.github.io/master/index.html)
+driver for the RIXSCAM developed by [XCAM UK](http://www.xcam.co.uk/)
 
 Credits
 -------
