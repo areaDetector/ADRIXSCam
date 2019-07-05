@@ -47,7 +47,8 @@ dbLoadRecords("$(ADRIXSCAM)/db/RIXSCam.template","P=$(PREFIX),R=cam1:,PORT=$(POR
 
 # Load XIP plugin.  Specify BlockCallbacks to true, which is how it should stay.
 NDPluginXIPConfigure("XIP1", $(QSIZE), 1, "$(PORT)", 0, -1, -1)
-dbLoadRecords("NDPluginXIP.template", "P=$(PREFIX),R=XIP1:,  PORT=XIP1,ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT)")
+dbLoadRecords("$(ADRIXSCAM_PLUGIN)/db/NDPluginXIP.template", "P=$(PREFIX),R=XIP1:,  PORT=XIP1,ADDR=0,TIMEOUT=1,NDARRAY_PORT=$(PORT)")
+set_requestfile_path("$(ADRIXSCAM_PLUGIN)", "Db")
 
 # Create a standard arrays plugin, set it to get data from first RIXSCam driver.
 NDStdArraysConfigure("Image1", 3, 0, "$(PORT)", 0)
