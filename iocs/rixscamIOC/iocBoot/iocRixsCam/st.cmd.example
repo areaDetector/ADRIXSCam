@@ -56,7 +56,6 @@ dbLoadRecords("NDStdArrays.template", "P=$(PREFIX),R=image1:,PORT=Image1,ADDR=0,
 < $(ADCORE)/iocBoot/commonPlugins.cmd
 
 set_requestfile_path("$(ADRIXSCAM)", "rixscamApp/Db")
-set_requestfile_path("$(ADCORE)","ADApp/Db")
 
 iocInit()
 
@@ -64,6 +63,5 @@ iocInit()
 eltc(1)
 
 # save things every thirty seconds
-set_requestfile_path(".")
 create_monitor_set("auto_settings.req", 30, "P=$(PREFIX)")
 
