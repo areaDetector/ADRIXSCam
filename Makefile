@@ -7,9 +7,16 @@ DIRS := $(DIRS) rixscamApp
 DIRS := $(DIRS) rixscamSupport
 rixscamApp_DEPEND_DIRS += rixscamSupport
 
+ifeq ($(ADRIXSCAM_PLUGIN), YES)
+	DIRS := $(DIRS) NDPluginXIPApp
+	DIRS := $(DIRS) NDPluginXIPSupport
+	NDPluginXIPApp_DEPEND_DIRS += NDPluginXIPSupport
+	rixscamApp_DEPEND_DIRS += NDPluginXIPApp
+endif
+
 ifeq ($(BUILD_IOCS), YES)
-DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard iocs))
-iocs_DEPEND_DIRS += rixscamApp
+	DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard iocs))
+	iocs_DEPEND_DIRS += rixscamApp
 endif
 
 include $(TOP)/configure/RULES_TOP

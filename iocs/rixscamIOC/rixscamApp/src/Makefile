@@ -23,6 +23,14 @@ PROD_SRCS += $(PROD_NAME)_registerRecordDeviceDriver.cpp $(PROD_NAME)Main.cpp
 PROD_LIBS += rixscam
 PROD_LIBS += xcmclm_x64
 
+# Include the XIP plugin if it is defined
+ifeq ($(ADRIXSCAM_PLUGIN), YES)
+	$(PROD_NAME)_DBD += NDPluginXIP.dbd
+	PROD_LIBS += NDPluginXIP
+	PROD_LIBS += XIP
+endif
+
+
 include $(ADCORE)/ADApp/commonDriverMakefile
 
 #=============================

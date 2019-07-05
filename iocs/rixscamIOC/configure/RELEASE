@@ -4,6 +4,10 @@
 
 ADRIXSCAM=$(TOP)/../..
 
+ifeq ($(ADRIXSCAM_PLUGIN), YES)
+	ADRIXSCAM_PLUGIN=$(TOP)../../NDPluginXIP
+endif
+
 -include $(TOP)/../../../configure/RELEASE_PRODS_INCLUDE
 -include $(TOP)/RELEASE.local
 -include $(TOP)/configure/RELEASE.local
