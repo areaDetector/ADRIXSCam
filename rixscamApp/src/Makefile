@@ -14,7 +14,7 @@ endif
 
 INC += rixscam.h
 
-LIBRARY_IOC = rixscam
+LIBRARY_IOC_WIN32 = rixscam
 LIB_SRCS += rixscam.cpp
 
 DBD += rixscamSupport.dbd
