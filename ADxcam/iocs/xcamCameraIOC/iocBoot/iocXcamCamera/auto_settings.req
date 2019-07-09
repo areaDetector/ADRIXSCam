@@ -1,4 +1,0 @@
-file "xcamCamera_settings.req",    P=$(P),  R=Camera1:
-file "NDStdArrays_settings.req",    P=$(P), R=image1:
-file "NDPluginXIP_settings.req",	P=$(P),	R=XIP1:
-file "commonPluginsLocal_settings.req",   P=$(P)
