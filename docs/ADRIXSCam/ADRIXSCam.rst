@@ -1,5 +1,5 @@
-areaDetector RIXSCAM driver
-===========================
+ADRIXSCam
+=========
 
 Overview
 --------
