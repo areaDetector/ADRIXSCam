@@ -109,7 +109,6 @@ xcamCamera::xcamCamera(const char *portName, int maxSizeX, int maxSizeY,
 	_switchModeCheck(false),
 	_grabWaitFlag(false),
 	_grabWaitValue(0)
-	//_node(1)
 {
 	int status = asynSuccess;
 	const char *functionName = "xcamCamera";
@@ -599,116 +598,9 @@ NDArray* xcamCamera::GetImage()
 			int triggerMode;
 			getIntegerParam(ADTriggerMode, &triggerMode);
 
-			//if (_roiParametersChanged)
-			//{
 			// Set/get camera parameters
-
 			callParamCallbacks();
 
-			/*
-			// Set the (global) gain and offset
-			if (_adcGainOffsetChanged)
-			{
-				result = xcm_clm_cds_gain(_serialNumbers[0], (short)_paramADC_GAIN.ScaledValue(*this));
-				result = xcm_clm_cds_offset(_serialNumbers[0], (short)_paramADC_OFFSET.ScaledValue(*this));
-				_adcGainOffsetChanged = false;
-			}
-			//result = xcm_clm_set_param(_serialNumbers[0], 65, (short)triggerMode);
-
-			// Node select handled specially because value to set differs from combo box selection
-			if (_roiParametersChanged)
-			{
-				short node;
-				switch ((short)_paramSEQ_NODE_SELECTION.Value(*this))
-				{
-				case 0:
-					node = 1;
-					break;
-				case 1:
-					node = 2;
-					break;
-				case 2:
-					//if (_node < 4)
-					//	LoadSequencer();
-					node = 4;
-					break;
-				case 3:
-					//if (_node < 4)
-					//	LoadSequencer();
-					node = 8;
-					break;
-				default:
-					node = 1;
-				}
-
-				//_node = node;
-
-				// Node select handled specially because value to set must be one greater than PV value
-				//result = xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(),
-				//	(short)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
-				result = xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(), node);
-				//_roiParameterIndices = false;
-			}
-
-			// Set all the sequencer parameters
-			// Need to sequencer parameters if the node has been changed hence including '_roiParametersChanged' as an option
-			if( (_SequencerParametersChanged) || (_roiParametersChanged))
-			{
-				for (auto param : _sequencerParams)
-				{
-					result = xcm_clm_set_param(_serialNumbers[0], param->InternalIndex(), (short)param->Value(*this));
-				}
-
-				_SequencerParametersChanged = false;
-			}
-
-			// Node select handled specially because value to set differs from combo box selection
-			//if (_roiParametersChanged)
-			//{
-			//	short node;
-			//	switch ((short)_paramSEQ_NODE_SELECTION.Value(*this))
-			//	{
-			//		case 0:
-			//			node = 1;
-			//			break;
-			//		case 1:
-			//			node = 2;
-			//			break;
-			//		case 2:
-			//			node = 4;
-			//			break;
-			//		case 3:
-			//			node = 8;
-			//			break;
-			//		default:
-			//			node = 1;
-			//	}
-			//
-			//	// Node select handled specially because value to set must be one greater than PV value
-			//	//result = xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(),
-			//	//	(short)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
-			//	result = xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(), node);
-			//	//_roiParameterIndices = false;
-			//}
-
-			if (_roiParametersChanged)
-			{
-				// Set the registers as required (global calls)
-				xcm_clm_set_param(_serialNumbers[0], 10, imageSizeX);
-				xcm_clm_set_param(_serialNumbers[0], 11, imageSizeY);
-				xcm_clm_set_param(_serialNumbers[0], 60, minX);
-				xcm_clm_set_param(_serialNumbers[0], 61, minY);
-				xcm_clm_set_param(_serialNumbers[0], 62, maxSizeX);
-				xcm_clm_set_param(_serialNumbers[0], 63, maxSizeY);
-				xcm_clm_set_param(_serialNumbers[0], 12, binX);
-				xcm_clm_set_param(_serialNumbers[0], 9, binY);
-			}
-
-			if ((_acquireTimeChanged) || (_roiParametersChanged))
-			{
-				SetExposureTime();
-			}
-			*/
 			// (The following would be much more efficient if grab_setup would accept a 'stride' parameter,
 			// so that all the images could be acquired into the same, final, buffer)
 
@@ -716,7 +608,6 @@ NDArray* xcamCamera::GetImage()
 			for (size_t ccd = 0; ccd < ccdCount; ++ccd)
 			{
 #pragma __Note__("Force grab_setup, even when ROI unchanged (bug in xcmclm?)")
-				//if ((_roiParametersChanged) || (_acquireTimeChanged))
 				if (_callGrabSetup)
 				{
 					// Release any previous buffer
@@ -742,51 +633,9 @@ NDArray* xcamCamera::GetImage()
 						imageSizeX, imageSizeY, 0, 0, imageSizeY, imageSizeX, (BYTE*)_ccdImages[ccd]->pData,
 						(int)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
 
-					/*
-					// Set the acquisition timeout to twice the integration time, plus 10 seconds
-					double acquireTime;
-					getDoubleParam(ADAcquireTime, &acquireTime);
-					long timeoutMs = (long)((acquireTime * 2.0 + 10.0) * 1000.0);
-					result = xcm_clm_set_timeout(_serialNumbers[ccd], timeoutMs);
-					*/
 				}
 			}
 
-			//if(_roiParametersChanged)
-			//{
-				// Enable the shutter if shutter mode is 'detector'
-				// Parameter 67 set to 15 to enable, 0 to disable
-			/*
-			if (_shutterModeChanged)
-			{
-				int shutterMode;
-				getIntegerParam(ADShutterMode, &shutterMode);
-				result = xcm_clm_set_param(_serialNumbers[0], 67, (short)(shutterMode == 2 ? 15 : 0));
-				_shutterModeChanged = false;
-			}
-				// Set the shutter close delay from ADShutterCloseDelay (convert to ms)
-			if (_shutterDelayChanged)
-			{
-				double shutterCloseDelay;
-				getDoubleParam(ADShutterCloseDelay, &shutterCloseDelay);
-				// We can't impose limits on this in the database since in EPICS shutter mode the limits
-				// may be different.  Instead we constrain here and (if necessary) set the readback value
-				if (shutterCloseDelay < 0)
-				{
-					shutterCloseDelay = 0;
-					setDoubleParam(ADShutterCloseDelay, shutterCloseDelay);
-				}
-				else if (shutterCloseDelay > 65.535)
-				{
-					shutterCloseDelay = 65.535;
-					setDoubleParam(ADShutterCloseDelay, shutterCloseDelay);
-				}
-
-				short shutterCloseDelay_ms = (short)(shutterCloseDelay * 1000.0 + 0.5);
-				result = xcm_clm_set_param(_serialNumbers[0], 66, shutterCloseDelay_ms);
-				_shutterDelayChanged = false;
-			}
-			*/
 			if (triggerMode < 3)
 				// Call the xcm_clm_pulse command to initialise the GPIO on the frame grabber card
 				xcm_clm_pulse(_serialNumbers[0], 0, 50, 50);
@@ -803,8 +652,6 @@ NDArray* xcamCamera::GetImage()
 			{
 				asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
 					"%s:%s: error grabbing image\n", _driverName, functionName);
-				// if the grab failed, call grab setup again
-				//_callGrabSetup = true;
 				return nullptr;
 			}
 
@@ -1033,7 +880,6 @@ void xcamCamera::imageTask()
 				result = xcm_clm_cds_offset(_serialNumbers[0], (short)_paramADC_OFFSET.ScaledValue(*this));
 				_adcGainOffsetChanged = false;
 			}
-			//result = xcm_clm_set_param(_serialNumbers[0], 65, (short)triggerMode);
 
 			// Node select handled specially because value to set differs from combo box selection
 			if (_roiParametersChanged)
@@ -1048,26 +894,16 @@ void xcamCamera::imageTask()
 					node = 2;
 					break;
 				case 2:
-					//if (_node < 4)
-					//	LoadSequencer();
 					node = 4;
 					break;
 				case 3:
-					//if (_node < 4)
-					//	LoadSequencer();
 					node = 8;
 					break;
 				default:
 					node = 1;
 				}
 
-				//_node = node;
-
-				// Node select handled specially because value to set must be one greater than PV value
-				//result = xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(),
-				//	(short)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
 				result = xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(), node);
-				//_roiParameterIndices = false;
 				_adcGainOffsetChanged = true;
 				_callGrabSetup = true;
 				_switchModeCheck = true;
@@ -1112,8 +948,6 @@ void xcamCamera::imageTask()
 				_switchModeCheck = true;
 			}
 
-			//if(_roiParametersChanged)
-			//{
 			// Enable the shutter if shutter mode is 'detector'
 			// Parameter 67 set to 15 to enable, 0 to disable
 			if (_shutterModeChanged)
@@ -1205,8 +1039,6 @@ void xcamCamera::imageTask()
 		// Did something tell us to stop acquiring?
 		if (epicsEventWaitOK == epicsEventTryWait(this->stopEventId))
 		{
-			//asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-			//	"%s:%s: Stop button pressed\n", _driverName, functionName);
 			acquire = false;
 			if (imageMode == ADImageContinuous) {
 				setIntegerParam(ADStatus, ADStatusIdle);
@@ -1221,17 +1053,6 @@ void xcamCamera::imageTask()
 
 		/* Close the shutter */
 		setShutter(ADShutterClosed);
-
-		/*
-		if (acquire)
-		{
-			setIntegerParam(ADStatus, ADStatusReadout);
-			//asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-			//	"%s:%s: AD Status Readout\n", _driverName, functionName);
-		}
-		*/
-
-		//setIntegerParam(ADStatus, ADStatusReadout);
 
 		/* Call the callbacks to update any changes */
 		callParamCallbacks();
@@ -1371,17 +1192,6 @@ int xcamCamera::computeRIXSArray(int sizeX, int sizeY)
 		}
 	}
 
-	// Generation of a quadratic.  (Could usefully be another mode of RIXS_SIMULATION, but not now...)
-	//double a = 0.0001, b = 0.01, c = 123.0;
-
-	//for (int x = centreX - radius; x < centreX + radius; ++x)
-	//{
-	//	double dx = (double)x;
-	//	int y = (int)((a * dx + b) * dx + c +0.5);
-	//	if (y >= 0 && y < sizeY)
-	//		pMono[y * sizeX + x] = eventHeight;
-	//}
-
 	return asynSuccess;
 }
 
@@ -1460,9 +1270,6 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 	getIntegerParam(ADImageMode, &imageMode);
 	if (function == ADAcquire)
 	{
-		//asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-		//	"Value = %i; acquiring = %i: \n", value, acquiring);
-
 		if (value && !acquiring)
 		{
 			if (_grabWaitFlag)
@@ -1474,9 +1281,6 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 		}
 		if (!value && acquiring)
 		{
-			//asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-			//	":: Stop event\n");
-
 			setStringParam(ADStatusMessage, "Acquisition stopped");
 			if (imageMode == ADImageContinuous)
 			{
@@ -1486,7 +1290,6 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 			{
 				setIntegerParam(ADStatus, ADStatusAborted);
 			}
-			//setIntegerParam(ADStatus, ADStatusAcquire);
 		}
 	}
 	else if (_paramCCD_POWER.HasParameterIndex(function))
@@ -1526,14 +1329,8 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 	// If the function refers to an ROI parameter, note it
 	_roiParametersChanged |= (_roiParameterIndices.find(function) != _roiParameterIndices.end());
-	// We behave the same way if the node selection is changed
-	//if (_paramSEQ_NODE_SELECTION.HasParameterIndex(function))
-	//{
 	// If node has changed force sequencer to be re-loaded
 	_roiParametersChanged |= _paramSEQ_NODE_SELECTION.HasParameterIndex(function);
-		//_sequencerFilenameChanged = true;
-	//}
-
 	_SequencerParametersChanged |= _paramSEQ_ADC_DELAY.HasParameterIndex(function);
 	_SequencerParametersChanged |= _paramSEQ_INT_MINUS_DELAY.HasParameterIndex(function);
 	_SequencerParametersChanged |= _paramSEQ_INT_PLUS_DELAY.HasParameterIndex(function);
