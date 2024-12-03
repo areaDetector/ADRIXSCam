@@ -590,72 +590,66 @@ NDArray* xcamCamera::GetImage()
 		size_t dims[2];
 		size_t ccdCount = _serialNumbers.size();
 
+		// Get the trigger mode
+		int triggerMode;
+		getIntegerParam(ADTriggerMode, &triggerMode);
+
+		// Set/get camera parameters
+		callParamCallbacks();
+
+		// (The following would be much more efficient if grab_setup would accept a 'stride' parameter,
+		// so that all the images could be acquired into the same, final, buffer)
+
+		// Below is the original code that was found on the Register
+		for (size_t ccd = 0; ccd < ccdCount; ++ccd)
 		{
-			// Lock the xcmclm mutex, so temperature thread can't get in
-			MutexLocker lock(_xcmclmMutex);
-
-			// Get the trigger mode
-			int triggerMode;
-			getIntegerParam(ADTriggerMode, &triggerMode);
-
-			// Set/get camera parameters
-			callParamCallbacks();
-
-			// (The following would be much more efficient if grab_setup would accept a 'stride' parameter,
-			// so that all the images could be acquired into the same, final, buffer)
-
-			// Below is the original code that was found on the Register
-			for (size_t ccd = 0; ccd < ccdCount; ++ccd)
-			{
 #pragma __Note__("Force grab_setup, even when ROI unchanged (bug in xcmclm?)")
-				if (_callGrabSetup)
-				{
-					// Release any previous buffer
-					if (_ccdImages[ccd] != nullptr)
-						_ccdImages[ccd]->release();
-
-					// Set the acquisition timeout to twice the integration time, plus 10 seconds
-					double acquireTime;
-					getDoubleParam(ADAcquireTime, &acquireTime);
-					long timeoutMs = (long)((acquireTime * 2.0 + 10.0) * 1000.0);
-					result = xcm_clm_set_timeout(_serialNumbers[ccd], timeoutMs);
-
-					// The image is smaller than sizeX/Y by the factors binX/Y
-					dims[xDim] = imageSizeX;
-					dims[yDim] = imageSizeY;
-					_ccdImages[ccd] = pNDArrayPool->alloc(2, dims, NDUInt16, 0, NULL);
-
-					// Set up the grab
-					// Note that sizeX and sizeY have to be passed twice, and reversed the second time!
-					// Also that the top/left are passed as zero; non-zero values would invoke a 'software'
-					// ROI (we want a 'hardware' ROI, as defined by the sequencer registers)
-					result = xcm_clm_grab_setup_1node(_serialNumbers[ccd],
-						imageSizeX, imageSizeY, 0, 0, imageSizeY, imageSizeX, (BYTE*)_ccdImages[ccd]->pData,
-						(int)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
-
-				}
-			}
-
-			if (triggerMode < 3)
-				// Call the xcm_clm_pulse command to initialise the GPIO on the frame grabber card
-				xcm_clm_pulse(_serialNumbers[0], 0, 50, 50);
-
-			// Grab from _all_ interfaces simultaneously
-			result = xcm_clm_grab(&_serialNumbers.front(), &errors.front(), (int)ccdCount);
-
-			// Settings now reflect the ROI parameters
-			_roiParametersChanged = false;
-			_SequencerParametersChanged = false;
-			_acquireTimeChanged = false;
-
-			if (result)
+			if (_callGrabSetup)
 			{
-				asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-					"%s:%s: error grabbing image\n", _driverName, functionName);
-				return nullptr;
-			}
+				// Release any previous buffer
+				if (_ccdImages[ccd] != nullptr)
+					_ccdImages[ccd]->release();
 
-		} // Release the mutex lock
+				// Set the acquisition timeout to twice the integration time, plus 10 seconds
+				double acquireTime;
+				getDoubleParam(ADAcquireTime, &acquireTime);
+				long timeoutMs = (long)((acquireTime * 2.0 + 10.0) * 1000.0);
+				result = xcm_clm_set_timeout(_serialNumbers[ccd], timeoutMs);
+
+				// The image is smaller than sizeX/Y by the factors binX/Y
+				dims[xDim] = imageSizeX;
+				dims[yDim] = imageSizeY;
+				_ccdImages[ccd] = pNDArrayPool->alloc(2, dims, NDUInt16, 0, NULL);
+
+				// Set up the grab
+				// Note that sizeX and sizeY have to be passed twice, and reversed the second time!
+				// Also that the top/left are passed as zero; non-zero values would invoke a 'software'
+				// ROI (we want a 'hardware' ROI, as defined by the sequencer registers)
+				result = xcm_clm_grab_setup_1node(_serialNumbers[ccd],
+					imageSizeX, imageSizeY, 0, 0, imageSizeY, imageSizeX, (BYTE*)_ccdImages[ccd]->pData,
+					(int)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
+
+			}
+		}
+
+		if (triggerMode < 3)
+			// Call the xcm_clm_pulse command to initialise the GPIO on the frame grabber card
+			xcm_clm_pulse(_serialNumbers[0], 0, 50, 50);
+
+		// Grab from _all_ interfaces simultaneously
+		result = xcm_clm_grab(&_serialNumbers.front(), &errors.front(), (int)ccdCount);
+
+		// Settings now reflect the ROI parameters
+		_roiParametersChanged = false;
+		_SequencerParametersChanged = false;
+		_acquireTimeChanged = false;
+
+		if (result)
+		{
+			asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+				"%s:%s: error grabbing image\n", _driverName, functionName);
+			return nullptr;
+		}
 
 		// Now, assemble the final image from the components
 		// It has an image for each ccd, with a one-pixel black (zero) border around each
@@ -753,14 +747,20 @@ void xcamCamera::imageTask()
 		callParamCallbacks();
 
 		bool acquisitionDone = false;
-		do
-		{
-			doAcquisition(acquisitionDone);
-		}
-		while(!acquisitionDone);
 
-		acquire = false;
-		setIntegerParam(ADAcquire, acquire);
+		/* Lock the mutex during the entire acquisition so the performance isn't
+		 * affected by concurrent tasks - i.e. temperature reading. */
+		{
+			MutexLocker lock(_xcmclmMutex);
+			do
+			{
+				doAcquisition(acquisitionDone);
+			}
+			while(!acquisitionDone);
+
+			acquire = false;
+			setIntegerParam(ADAcquire, acquire);
+		}
 		callParamCallbacks();
 	}
 }
@@ -838,7 +838,6 @@ void xcamCamera::doAcquisition(bool &acquisitionDone)
 	}
 	else
 	{
-		MutexLocker lock(_xcmclmMutex);
 		if (configureCaptureParams() != XE_OK)
 		{
 			asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
