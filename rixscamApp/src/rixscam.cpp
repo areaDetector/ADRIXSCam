@@ -733,36 +733,35 @@ void xcamCamera::imageTask()
 
 	this->lock();
 	/* Loop forever */
-	while (!_exiting) {
-
-		// If we are not acquiring then wait for a semaphore that is given when acquisition is started
-		// (or, if there's a timeout, just set the camera parameters according to the PVs)
-		if (!acquire) {
+	while (!_exiting)
+	{
+		// If we are not acquiring then update the camera state and wait for a
+		// semaphore that is given when acquisition is started
+		if (!acquire)
 		{
+			epicsEventStatus startEventStatus = epicsEventWaitTimeout;
+			while (startEventStatus != epicsEventOK)
 			{
-				MutexLocker lock(_xcmclmMutex);
-				if (configureCaptureParams() != XE_OK)
 				{
-					asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-						"%s:%s: error configuring parameters\n", _driverName, functionName);
+					MutexLocker lock(_xcmclmMutex);
+					if (configureCaptureParams() != XE_OK)
+					{
+						asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+							"%s:%s: error configuring parameters\n", _driverName, functionName);
+					}
 				}
+
+				/* Release the lock while we wait for an event that says acquire has started, then lock again */
+				asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+					"%s:%s: waiting for acquire to start\n", _driverName, functionName);
+				this->unlock();
+				startEventStatus = epicsEventWaitWithTimeout(this->startEventId, _acquireTimeoutSeconds);
+				this->lock();
 			}
 
-			/* Release the lock while we wait for an event that says acquire has started, then lock again */
-			asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-				"%s:%s: waiting for acquire to start\n", _driverName, functionName);
-			this->unlock();
-			epicsEventStatus startEventStatus = epicsEventWaitWithTimeout(this->startEventId, _acquireTimeoutSeconds);
-			this->lock();
-
-			if (startEventStatus == epicsEventWaitOK)
-			{
-				// We saw the semaphore, so should do a real acquisition
-				acquire = true;
-			}
+			// We saw the semaphore, so should do a real acquisition
+			acquire = true;
 		}
-
-		if (!acquire) continue;
 
 		setIntegerParam(ADAcquire, acquire);
 		setStringParam(ADStatusMessage, "Acquiring data");
