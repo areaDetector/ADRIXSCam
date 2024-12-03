@@ -769,143 +769,147 @@ void xcamCamera::imageTask()
 		callParamCallbacks();
 
 		bool acquisitionDone = false;
-		int imageMode;
-
-		epicsEventStatus stopEventStatus;
 
 		do
 		{
-			getIntegerParam(ADImageMode, &imageMode);
-
-			/* Get the current time */
-			epicsTimeStamp startTime, endTime;
-			double elapsedTime;
-			epicsTimeGetCurrent(&startTime);
-
-			/* Get the exposure parameters */
-			double acquireTime, acquirePeriod, delay;
-			getDoubleParam(ADAcquireTime, &acquireTime);
-			getDoubleParam(ADAcquirePeriod, &acquirePeriod);
-
-			/* We are acquiring. */
-			setIntegerParam(ADStatus, ADStatusAcquire);
-
-			/* Open the shutter */
-			setShutter(ADShutterOpen);
-
-			callParamCallbacks();
-
-
-			if (_paramRIXS_SIMULATION.Value(*this))
-			{
-				/* Simulate being busy during the exposure time.  Use epicsEventWaitWithTimeout so that
-				 * manually stopping the acquisition will work */
-				this->unlock();
-				stopEventStatus = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
-				this->lock();
-
-				if (stopEventStatus == epicsEventWaitOK)
-				{
-					acquire = false;
-					setIntegerParam(ADAcquire, acquire);
-					callParamCallbacks();
-					break;
-
-				}
-
-			}
-			else
-			{
-				MutexLocker lock(_xcmclmMutex);
-				if (configureCaptureParams() != XE_OK)
-				{
-					asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-						"%s:%s: error configuring parameters\n", _driverName, functionName);
-				}
-			}
-
-			setIntegerParam(ADStatus, ADStatusReadout);
-
-			/* Update the image */
-			NDArray* pImage = GetImage();
-
-			if (pImage == nullptr) continue;
-
-			/* Close the shutter */
-			setShutter(ADShutterClosed);
-
-			/* Call the callbacks to update any changes */
-			callParamCallbacks();
-
-			/* Get the current parameters */
-			int imageCounter;
-			int numImages, numImagesCounter;
-			int arrayCallbacks;
-			getIntegerParam(NDArrayCounter, &imageCounter);
-			getIntegerParam(ADNumImages, &numImages);
-			getIntegerParam(ADNumImagesCounter, &numImagesCounter);
-			getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
-			imageCounter++;
-			numImagesCounter++;
-			setIntegerParam(NDArrayCounter, imageCounter);
-			setIntegerParam(ADNumImagesCounter, numImagesCounter);
-
-			callParamCallbacks();
-
-			/* Put the frame number and time stamp into the buffer */
-			pImage->uniqueId = imageCounter;
-			pImage->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
-			updateTimeStamp(&pImage->epicsTS);
-
-			/* Get any attributes that have been defined for this driver */
-			this->getAttributes(pImage->pAttributeList);
-
-			if (arrayCallbacks)
-			{
-				/* Call the NDArray callback */
-				/* Must release the lock here, or we can get into a deadlock, because we can
-				* block on the plugin lock, and the plugin can be calling us */
-				this->unlock();
-				asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-					"%s:%s: calling imageData callback\n", _driverName, functionName);
-				doCallbacksGenericPointer(pImage, NDArrayData, 0);
-				this->lock();
-			}
-
-			pImage->release();
-
-			/* Call the callbacks to update any changes */
-			callParamCallbacks();
-
-			/* If we are still acquiring then sleep for the acquire period minus elapsed time. */
-			epicsTimeGetCurrent(&endTime);
-			elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
-			delay = acquirePeriod - elapsedTime;
-			asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-				"%s:%s: delay=%f\n",
-				_driverName, functionName, delay);
-
-			/* The delay can't be a negative value */
-			if(delay < 0) delay = 0;
-
-			/* We set the status to waiting to indicate we are in the period delay */
-			setIntegerParam(ADStatus, ADStatusWaiting);
-			callParamCallbacks();
-
-			/* Check if received a stop or wait for the delay time*/
-			this->unlock();
-			stopEventStatus = epicsEventWaitWithTimeout(this->stopEventId, delay);
-			this->lock();
-
-			acquisitionDone = (stopEventStatus == epicsEventWaitOK) ||
-								(imageMode == ADImageSingle) ||
-								(imageMode == ADImageMultiple && numImagesCounter >= numImages);
-
+			doAcquisition(acquisitionDone);
 		}
 		while(!acquisitionDone);
 
 		acquire = false;
 		setIntegerParam(ADAcquire, acquire);
+		callParamCallbacks();
+	}
+}
+
+
+void xcamCamera::doAcquisition(bool &acquisitionDone)
+{
+	const char* functionName = "doAcquisition";
+
+	/* Get the current time */
+	epicsTimeStamp startTime, endTime;
+	double elapsedTime;
+	epicsTimeGetCurrent(&startTime);
+	int imageMode;
+	getIntegerParam(ADImageMode, &imageMode);
+
+	/* Get the exposure parameters */
+	double acquireTime, acquirePeriod, delay;
+	getDoubleParam(ADAcquireTime, &acquireTime);
+	getDoubleParam(ADAcquirePeriod, &acquirePeriod);
+
+	/* We are acquiring. */
+	setIntegerParam(ADStatus, ADStatusAcquire);
+
+	/* Open the shutter */
+	setShutter(ADShutterOpen);
+
+	callParamCallbacks();
+
+	epicsEventStatus stopEventStatus;
+
+	if (_paramRIXS_SIMULATION.Value(*this))
+	{
+		/* Simulate being busy during the exposure time.  Use epicsEventWaitWithTimeout so that
+		 * manually stopping the acquisition will work */
+		this->unlock();
+		stopEventStatus = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
+		this->lock();
+
+		if (stopEventStatus == epicsEventWaitOK)
+		{
+			acquisitionDone = true;
+			setIntegerParam(ADStatus, ADStatusAborted);
+			callParamCallbacks();
+			return;
+		}
+	}
+	else
+	{
+		MutexLocker lock(_xcmclmMutex);
+		if (configureCaptureParams() != XE_OK)
+		{
+			asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+				"%s:%s: error configuring parameters\n", _driverName, functionName);
+		}
+	}
+
+	setIntegerParam(ADStatus, ADStatusReadout);
+
+	/* Update the image */
+	NDArray* pImage = GetImage();
+
+	if (pImage == nullptr) return;
+
+	/* Close the shutter */
+	setShutter(ADShutterClosed);
+
+	/* Call the callbacks to update any changes */
+	callParamCallbacks();
+
+	/* Get the current parameters */
+	int imageCounter;
+	int numImages, numImagesCounter;
+	int arrayCallbacks;
+	getIntegerParam(NDArrayCounter, &imageCounter);
+	getIntegerParam(ADNumImages, &numImages);
+	getIntegerParam(ADNumImagesCounter, &numImagesCounter);
+	getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
+	imageCounter++;
+	numImagesCounter++;
+	setIntegerParam(NDArrayCounter, imageCounter);
+	setIntegerParam(ADNumImagesCounter, numImagesCounter);
+
+	/* Put the frame number and time stamp into the buffer */
+	pImage->uniqueId = imageCounter;
+	pImage->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
+	updateTimeStamp(&pImage->epicsTS);
+
+	/* Get any attributes that have been defined for this driver */
+	this->getAttributes(pImage->pAttributeList);
+
+	if (arrayCallbacks)
+	{
+		/* Call the NDArray callback */
+		/* Must release the lock here, or we can get into a deadlock, because we can
+		* block on the plugin lock, and the plugin can be calling us */
+		this->unlock();
+		asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+			"%s:%s: calling imageData callback\n", _driverName, functionName);
+		doCallbacksGenericPointer(pImage, NDArrayData, 0);
+		this->lock();
+	}
+
+	pImage->release();
+
+	/* Call the callbacks to update any changes */
+	callParamCallbacks();
+
+	/* If we are still acquiring then sleep for the acquire period minus elapsed time. */
+	epicsTimeGetCurrent(&endTime);
+	elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
+	delay = acquirePeriod - elapsedTime;
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+		"%s:%s: delay=%f\n", _driverName, functionName, delay);
+
+	/* The delay can't be a negative value */
+	if(delay < 0) delay = 0;
+
+	/* We set the status to waiting to indicate we are in the period delay */
+	setIntegerParam(ADStatus, ADStatusWaiting);
+	callParamCallbacks();
+
+	this->unlock();
+	stopEventStatus = epicsEventWaitWithTimeout(this->stopEventId, delay);
+	this->lock();
+
+	acquisitionDone = (stopEventStatus == epicsEventWaitOK) ||
+					   (imageMode == ADImageSingle) ||
+					   (imageMode == ADImageMultiple && numImagesCounter >= numImages);
+
+	if(acquisitionDone)
+	{
 		if (stopEventStatus == epicsEventWaitOK && imageMode == ADImageMultiple)
 		{
 			setIntegerParam(ADStatus, ADStatusAborted);

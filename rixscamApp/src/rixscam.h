@@ -492,6 +492,7 @@ private:
     int computeRIXSArray(int sizeX, int sizeY);
     NDArray* GetImage();
     int configureCaptureParams();
+    void doAcquisition(bool &acquisition_done);
 
 	enum temperatureControllerCommands
 	{
