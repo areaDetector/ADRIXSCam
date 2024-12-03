@@ -739,6 +739,16 @@ void xcamCamera::imageTask()
 		// If we are not acquiring then wait for a semaphore that is given when acquisition is started
 		// (or, if there's a timeout, just set the camera parameters according to the PVs)
 		if (!acquire) {
+		{
+			{
+				MutexLocker lock(_xcmclmMutex);
+				if (configureCaptureParams() != XE_OK)
+				{
+					asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+						"%s:%s: error configuring parameters\n", _driverName, functionName);
+				}
+			}
+
 			/* Release the lock while we wait for an event that says acquire has started, then lock again */
 			asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
 				"%s:%s: waiting for acquire to start\n", _driverName, functionName);
@@ -753,9 +763,11 @@ void xcamCamera::imageTask()
 				setIntegerParam(ADAcquire, acquire);
 				setStringParam(ADStatusMessage, "Acquiring data");
 				setIntegerParam(ADNumImagesCounter, 0);
+				callParamCallbacks();
 			}
-			// (If we timed out, we might still want to update some camera states, but won't do an acquisition)
 		}
+
+		if (!acquire) continue;
 
 		/* Get the current time */
 		epicsTimeStamp startTime, endTime;
@@ -769,60 +781,54 @@ void xcamCamera::imageTask()
 		getDoubleParam(ADAcquireTime, &acquireTime);
 		getDoubleParam(ADAcquirePeriod, &acquirePeriod);
 
-		if (acquire)
-		{
-			/* We are acquiring. */
-			setIntegerParam(ADStatus, ADStatusAcquire);
+		/* We are acquiring. */
+		setIntegerParam(ADStatus, ADStatusAcquire);
 
-			/* Open the shutter */
-			setShutter(ADShutterOpen);
-		}
+		/* Open the shutter */
+		setShutter(ADShutterOpen);
 
-		/* Call the callbacks to update any changes */
 		callParamCallbacks();
 
 		if (_paramRIXS_SIMULATION.Value(*this))
 		{
-			if (acquire)
-			{
-				/* Simulate being busy during the exposure time.  Use epicsEventWaitWithTimeout so that
-				 * manually stopping the acquisition will work */
+			/* Simulate being busy during the exposure time.  Use epicsEventWaitWithTimeout so that
+			 * manually stopping the acquisition will work */
 
-				if (acquireTime > 0.0) {
-					this->unlock();
-					status = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
-					this->lock();
+			if (acquireTime > 0.0)
+			{
+				this->unlock();
+				status = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
+				this->lock();
+			}
+			else
+			{
+				status = epicsEventTryWait(this->stopEventId);
+			}
+			if (status == epicsEventWaitOK)
+			{
+				acquire = false;
+				setIntegerParam(ADAcquire, acquire);
+				if (imageMode == ADImageContinuous)
+				{
+					setIntegerParam(ADStatus, ADStatusIdle);
 				}
-				else {
-					status = epicsEventTryWait(this->stopEventId);
+				else
+				{
+					setIntegerParam(ADStatus, ADStatusAborted);
 				}
-				if (status == epicsEventWaitOK) {
-					acquire = false;
-					setIntegerParam(ADAcquire, acquire);
-					if (imageMode == ADImageContinuous) {
-						setIntegerParam(ADStatus, ADStatusIdle);
-					}
-					else {
-						setIntegerParam(ADStatus, ADStatusAborted);
-					}
-					callParamCallbacks();
-				}
+				callParamCallbacks();
+				continue;
 			}
 		}
 		else
 		{
-			// We do the following even if not acquiring, so that the camera state can be updated
-			// according to the PVs
 			MutexLocker lock(_xcmclmMutex);
 			if (configureCaptureParams() != XE_OK)
 			{
 				asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
 					"%s:%s: error configuring parameters\n", _driverName, functionName);
 			}
-
-		} // xcmclm mutex released here
-
-		if (!acquire) continue;
+		}
 
 		setIntegerParam(ADStatus, ADStatusReadout);
 
@@ -834,10 +840,12 @@ void xcamCamera::imageTask()
 		{
 			acquire = false;
 			setIntegerParam(ADAcquire, acquire);
-			if (imageMode == ADImageContinuous) {
+			if (imageMode == ADImageContinuous)
+			{
 				setIntegerParam(ADStatus, ADStatusIdle);
 			}
-			else {
+			else
+			{
 				setIntegerParam(ADStatus, ADStatusAborted);
 			}
 			callParamCallbacks();
@@ -864,6 +872,8 @@ void xcamCamera::imageTask()
 		setIntegerParam(NDArrayCounter, imageCounter);
 		setIntegerParam(ADNumImagesCounter, numImagesCounter);
 
+		callParamCallbacks();
+
 		/* Put the frame number and time stamp into the buffer */
 		pImage->uniqueId = imageCounter;
 		pImage->timeStamp = startTime.secPastEpoch + startTime.nsec / 1.e9;
@@ -872,7 +882,8 @@ void xcamCamera::imageTask()
 		/* Get any attributes that have been defined for this driver */
 		this->getAttributes(pImage->pAttributeList);
 
-		if (arrayCallbacks) {
+		if (arrayCallbacks)
+		{
 			/* Call the NDArray callback */
 			/* Must release the lock here, or we can get into a deadlock, because we can
 			* block on the plugin lock, and the plugin can be calling us */
@@ -888,12 +899,11 @@ void xcamCamera::imageTask()
 		/* See if acquisition is done */
 		if ((imageMode == ADImageSingle) ||
 			((imageMode == ADImageMultiple) &&
-			(numImagesCounter >= numImages))) {
+			(numImagesCounter >= numImages)))
+		{
 
-			/* First do callback on ADStatus. */
 			setStringParam(ADStatusMessage, "Waiting for acquisition");
 			setIntegerParam(ADStatus, ADStatusIdle);
-			callParamCallbacks();
 
 			acquire = false;
 			setIntegerParam(ADAcquire, acquire);
@@ -904,31 +914,37 @@ void xcamCamera::imageTask()
 		/* Call the callbacks to update any changes */
 		callParamCallbacks();
 
-		/* If we are acquiring then sleep for the acquire period minus elapsed time. */
-		if (acquire) {
-			epicsTimeGetCurrent(&endTime);
-			elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
-			delay = acquirePeriod - elapsedTime;
-			asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-				"%s:%s: delay=%f\n",
-				_driverName, functionName, delay);
-			if (delay >= 0.0) {
-				/* We set the status to waiting to indicate we are in the period delay */
-				setIntegerParam(ADStatus, ADStatusWaiting);
-				callParamCallbacks();
-				this->unlock();
-				status = epicsEventWaitWithTimeout(this->stopEventId, delay);
-				this->lock();
-				if (status == epicsEventWaitOK) {
-					acquire = false;
-					if (imageMode == ADImageContinuous) {
-						setIntegerParam(ADStatus, ADStatusIdle);
-					}
-					else {
-						setIntegerParam(ADStatus, ADStatusAborted);
-					}
-					callParamCallbacks();
+		if (!acquire) continue;
+
+		/* If we are still acquiring then sleep for the acquire period minus elapsed time. */
+		epicsTimeGetCurrent(&endTime);
+		elapsedTime = epicsTimeDiffInSeconds(&endTime, &startTime);
+		delay = acquirePeriod - elapsedTime;
+		asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+			"%s:%s: delay=%f\n",
+			_driverName, functionName, delay);
+
+		if (delay >= 0.0)
+		{
+			/* We set the status to waiting to indicate we are in the period delay */
+			setIntegerParam(ADStatus, ADStatusWaiting);
+			callParamCallbacks();
+			this->unlock();
+			status = epicsEventWaitWithTimeout(this->stopEventId, delay);
+			this->lock();
+			if (status == epicsEventWaitOK)
+			{
+				acquire = false;
+				setIntegerParam(ADAcquire, acquire);
+				if (imageMode == ADImageContinuous)
+				{
+					setIntegerParam(ADStatus, ADStatusIdle);
 				}
+				else
+				{
+					setIntegerParam(ADStatus, ADStatusAborted);
+				}
+				callParamCallbacks();
 			}
 		}
 	}
