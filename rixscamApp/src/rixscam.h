@@ -493,6 +493,7 @@ private:
     NDArray* GetImage();
     int configureCaptureParams();
     void doAcquisition(bool &acquisition_done);
+    epicsEventStatus preAcquisition();
 
 	enum temperatureControllerCommands
 	{

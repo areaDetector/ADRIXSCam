@@ -735,28 +735,12 @@ void xcamCamera::imageTask()
 	/* Loop forever */
 	while (!_exiting)
 	{
-		// If we are not acquiring then update the camera state and wait for a
-		// semaphore that is given when acquisition is started
 		if (!acquire)
 		{
 			epicsEventStatus startEventStatus = epicsEventWaitTimeout;
 			while (startEventStatus != epicsEventOK)
 			{
-				{
-					MutexLocker lock(_xcmclmMutex);
-					if (configureCaptureParams() != XE_OK)
-					{
-						asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-							"%s:%s: error configuring parameters\n", _driverName, functionName);
-					}
-				}
-
-				/* Release the lock while we wait for an event that says acquire has started, then lock again */
-				asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-					"%s:%s: waiting for acquire to start\n", _driverName, functionName);
-				this->unlock();
-				startEventStatus = epicsEventWaitWithTimeout(this->startEventId, _acquireTimeoutSeconds);
-				this->lock();
+				startEventStatus = preAcquisition();
 			}
 
 			// We saw the semaphore, so should do a real acquisition
@@ -769,7 +753,6 @@ void xcamCamera::imageTask()
 		callParamCallbacks();
 
 		bool acquisitionDone = false;
-
 		do
 		{
 			doAcquisition(acquisitionDone);
@@ -782,6 +765,34 @@ void xcamCamera::imageTask()
 	}
 }
 
+
+// If we are not acquiring then update the camera state and wait for a
+// semaphore that is given when acquisition is started
+// Returns the status of the semaphore waiting operation.
+epicsEventStatus xcamCamera::preAcquisition()
+{
+	const char* functionName = "preAcquisition";
+	{
+		MutexLocker lock(_xcmclmMutex);
+		if (configureCaptureParams() != XE_OK)
+		{
+			asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+				"%s:%s: error configuring parameters\n", _driverName, functionName);
+		}
+	}
+	/* Release the lock while we wait for an event that says acquire has started, then lock again */
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+		"%s:%s: waiting for acquire to start\n", _driverName, functionName);
+
+	this->unlock();
+	epicsEventStatus startEventStatus = epicsEventWaitWithTimeout(this->startEventId, _acquireTimeoutSeconds);
+	this->lock();
+
+	/* Call the callbacks to update any changes */
+	callParamCallbacks();
+
+	return startEventStatus;
+}
 
 void xcamCamera::doAcquisition(bool &acquisitionDone)
 {
