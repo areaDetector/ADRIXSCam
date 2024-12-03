@@ -793,17 +793,9 @@ void xcamCamera::imageTask()
 		{
 			/* Simulate being busy during the exposure time.  Use epicsEventWaitWithTimeout so that
 			 * manually stopping the acquisition will work */
-
-			if (acquireTime > 0.0)
-			{
-				this->unlock();
-				status = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
-				this->lock();
-			}
-			else
-			{
-				status = epicsEventTryWait(this->stopEventId);
-			}
+			this->unlock();
+			status = epicsEventWaitWithTimeout(this->stopEventId, acquireTime);
+			this->lock();
 			if (status == epicsEventWaitOK)
 			{
 				acquire = false;
@@ -834,22 +826,6 @@ void xcamCamera::imageTask()
 
 		/* Update the image */
 		NDArray* pImage = GetImage();
-
-		// Did something tell us to stop acquiring?
-		if (epicsEventWaitOK == epicsEventTryWait(this->stopEventId))
-		{
-			acquire = false;
-			setIntegerParam(ADAcquire, acquire);
-			if (imageMode == ADImageContinuous)
-			{
-				setIntegerParam(ADStatus, ADStatusIdle);
-			}
-			else
-			{
-				setIntegerParam(ADStatus, ADStatusAborted);
-			}
-			callParamCallbacks();
-		}
 
 		if (pImage == nullptr) continue;
 
@@ -924,28 +900,28 @@ void xcamCamera::imageTask()
 			"%s:%s: delay=%f\n",
 			_driverName, functionName, delay);
 
-		if (delay >= 0.0)
+		/* The delay can't be a negative value */
+		if (delay < 0) delay = 0;
+
+		/* We set the status to waiting to indicate we are in the period delay */
+		setIntegerParam(ADStatus, ADStatusWaiting);
+		callParamCallbacks();
+		this->unlock();
+		status = epicsEventWaitWithTimeout(this->stopEventId, delay);
+		this->lock();
+		if (status == epicsEventWaitOK)
 		{
-			/* We set the status to waiting to indicate we are in the period delay */
-			setIntegerParam(ADStatus, ADStatusWaiting);
-			callParamCallbacks();
-			this->unlock();
-			status = epicsEventWaitWithTimeout(this->stopEventId, delay);
-			this->lock();
-			if (status == epicsEventWaitOK)
+			acquire = false;
+			setIntegerParam(ADAcquire, acquire);
+			if (imageMode == ADImageContinuous)
 			{
-				acquire = false;
-				setIntegerParam(ADAcquire, acquire);
-				if (imageMode == ADImageContinuous)
-				{
-					setIntegerParam(ADStatus, ADStatusIdle);
-				}
-				else
-				{
-					setIntegerParam(ADStatus, ADStatusAborted);
-				}
-				callParamCallbacks();
+				setIntegerParam(ADStatus, ADStatusIdle);
 			}
+			else
+			{
+				setIntegerParam(ADStatus, ADStatusAborted);
+			}
+			callParamCallbacks();
 		}
 	}
 }
