@@ -814,221 +814,12 @@ void xcamCamera::imageTask()
 			// We do the following even if not acquiring, so that the camera state can be updated
 			// according to the PVs
 			MutexLocker lock(_xcmclmMutex);
-			int result;
-			int binX, binY, minX, minY, sizeX, sizeY;
-			int maxSizeX, maxSizeY;
-
-			status |= getIntegerParam(ADBinX, &binX);
-			status |= getIntegerParam(ADBinY, &binY);
-			status |= getIntegerParam(ADMinX, &minX);
-			status |= getIntegerParam(ADMinY, &minY);
-			status |= getIntegerParam(ADSizeX, &sizeX);
-			status |= getIntegerParam(ADSizeY, &sizeY);
-			status |= getIntegerParam(ADMaxSizeX, &maxSizeX);
-			status |= getIntegerParam(ADMaxSizeY, &maxSizeY);
-
-			int imageSizeX = ((sizeX - 16) / binX) + 16;	// Take account of 16 pixel underscan which is always there and not binned
-			RoundUpToEven(imageSizeX); // Framegrabber requires that delivered image size is even
-			int imageSizeY = sizeY / binY;
-			RoundUpToEven(imageSizeY); // Framegrabber requires that delivered image size is even
-
-			if (_sequencerFilenameChanged)
+			if (configureCaptureParams() != XE_OK)
 			{
-				// Read the new sequencer file
-				asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-					"%s:%s: New sequencer filename setting detected\n", _driverName, functionName);
-
-				LoadSequencer();
-
-				// The new sequencer filename has been responded to; don't do so again
-				_sequencerFilenameChanged = false;
-				// Download all parameters if Sequencer file has been uploaded
-				_roiParametersChanged = true;
-				_SequencerParametersChanged = true;
-				_acquireTimeChanged = true;
-				_shutterDelayChanged = true;
-				_shutterModeChanged = true;
-				_callGrabSetup = true;
-				_switchModeCheck = true;
+				asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+					"%s:%s: error configuring parameters\n", _driverName, functionName);
 			}
 
-			if (_CCDPowerChanged)
-			{
-				asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-					"%s:%s: New CCD power setting detected\n", _driverName, functionName);
-
-				SetCCDPower();
-			}
-
-			if (_voltageParamsChanged)
-			{
-				SetCCDVoltages();
-			}
-
-			if (_TriggerModeChanged)
-			{
-				// Set the trigger mode
-				int triggerMode;
-				getIntegerParam(ADTriggerMode, &triggerMode);
-				xcm_clm_set_param(_serialNumbers[0], 65, (short)triggerMode);
-				_TriggerModeChanged = false;
-				_switchModeCheck = true;
-			}
-
-			// Set the (global) gain and offset
-			if (_adcGainOffsetChanged)
-			{
-				result = xcm_clm_cds_gain(_serialNumbers[0], (short)_paramADC_GAIN.ScaledValue(*this));
-				result = xcm_clm_cds_offset(_serialNumbers[0], (short)_paramADC_OFFSET.ScaledValue(*this));
-				_adcGainOffsetChanged = false;
-			}
-
-			// Node select handled specially because value to set differs from combo box selection
-			if (_roiParametersChanged)
-			{
-				short node;
-				switch ((short)_paramSEQ_NODE_SELECTION.Value(*this))
-				{
-				case 0:
-					node = 1;
-					break;
-				case 1:
-					node = 2;
-					break;
-				case 2:
-					node = 4;
-					break;
-				case 3:
-					node = 8;
-					break;
-				default:
-					node = 1;
-				}
-
-				result = xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(), node);
-				_adcGainOffsetChanged = true;
-				_callGrabSetup = true;
-				_switchModeCheck = true;
-
-			}
-
-			// Set all the sequencer parameters
-			// Need to sequencer parameters if the node has been changed hence including '_roiParametersChanged' as an option
-			if ((_SequencerParametersChanged) || (_roiParametersChanged))
-			{
-				for (auto param : _sequencerParams)
-				{
-					result = xcm_clm_set_param(_serialNumbers[0], param->InternalIndex(), (short)param->Value(*this));
-				}
-
-				_SequencerParametersChanged = false;
-				_callGrabSetup = true;
-				_switchModeCheck = true;
-			}
-
-			if (_roiParametersChanged)
-			{
-				// Set the registers as required (global calls)
-				xcm_clm_set_param(_serialNumbers[0], 10, imageSizeX);
-				xcm_clm_set_param(_serialNumbers[0], 11, imageSizeY);
-				xcm_clm_set_param(_serialNumbers[0], 60, minX);
-				xcm_clm_set_param(_serialNumbers[0], 61, minY);
-				xcm_clm_set_param(_serialNumbers[0], 62, maxSizeX);
-				xcm_clm_set_param(_serialNumbers[0], 63, maxSizeY);
-				xcm_clm_set_param(_serialNumbers[0], 12, binX);
-				xcm_clm_set_param(_serialNumbers[0], 9, binY);
-				_callGrabSetup = true;
-				_switchModeCheck = true;
-
-			}
-
-			if ((_acquireTimeChanged) || (_roiParametersChanged))
-			{
-				SetExposureTime();
-				_acquireTimeChanged = false;
-				_callGrabSetup = true;
-				_switchModeCheck = true;
-			}
-
-			// Enable the shutter if shutter mode is 'detector'
-			// Parameter 67 set to 15 to enable, 0 to disable
-			if (_shutterModeChanged)
-			{
-				int shutterMode;
-				getIntegerParam(ADShutterMode, &shutterMode);
-				result = xcm_clm_set_param(_serialNumbers[0], 67, (short)(shutterMode == 2 ? 15 : 0));
-				_shutterModeChanged = false;
-			}
-			// Set the shutter close delay from ADShutterCloseDelay (convert to ms)
-			if (_shutterDelayChanged)
-			{
-				double shutterCloseDelay;
-				getDoubleParam(ADShutterCloseDelay, &shutterCloseDelay);
-				// We can't impose limits on this in the database since in EPICS shutter mode the limits
-				// may be different.  Instead we constrain here and (if necessary) set the readback value
-				if (shutterCloseDelay < 0)
-				{
-					shutterCloseDelay = 0;
-					setDoubleParam(ADShutterCloseDelay, shutterCloseDelay);
-				}
-				else if (shutterCloseDelay > 65.535)
-				{
-					shutterCloseDelay = 65.535;
-					setDoubleParam(ADShutterCloseDelay, shutterCloseDelay);
-				}
-
-				short shutterCloseDelay_ms = (short)(shutterCloseDelay * 1000.0 + 0.5);
-				result = xcm_clm_set_param(_serialNumbers[0], 66, shutterCloseDelay_ms);
-				_shutterDelayChanged = false;
-			}
-
-			if (_callGrabSetup)
-			{
-				epicsThreadSleep(0.5);
-				_roiParametersChanged = false;
-			}
-
-			if (_switchModeCheck)
-			{
-				// Set the trigger mode
-				int triggerMode;
-				getIntegerParam(ADTriggerMode, &triggerMode);
-				// Check to see if we have been updating parameters whilst in an external trigger mode
-				if ((triggerMode < 3) || (triggerMode==5))
-				{
-					short node;
-					switch ((short)_paramSEQ_NODE_SELECTION.Value(*this))
-					{
-						case 0:
-							if (imageSizeX < 1654)
-								_grabWaitValue = 1.5;
-							else
-								_grabWaitValue = 2.5;
-							break;
-						case 1:
-							if (imageSizeX < 1654)
-								_grabWaitValue = 3;
-							else
-								_grabWaitValue = 6;
-							break;
-						default:
-							if (imageSizeX < 1654)
-								_grabWaitValue = 3;
-							else
-								_grabWaitValue = 6;
-							break;
-					}
-
-					_grabWaitFlag = true;
-
-					// Briefly release the external trigger mode and then set back to original state
-					xcm_clm_set_param(_serialNumbers[0], 65, 3);
-					epicsThreadSleep(0.3);
-					xcm_clm_set_param(_serialNumbers[0], 65, (short)triggerMode);
-					epicsThreadSleep(1);
-				}
-				_switchModeCheck = false;
-			}
 		} // xcmclm mutex released here
 
 		if (!acquire) continue;
@@ -1141,6 +932,237 @@ void xcamCamera::imageTask()
 			}
 		}
 	}
+}
+
+// This function must be run while holding the mutex.
+int xcamCamera::configureCaptureParams()
+{
+	int result = XE_OK, status = asynSuccess;
+	int binX, binY, minX, minY, sizeX, sizeY;
+	int maxSizeX, maxSizeY;
+	const char* functionName = "configureCaptureParams";
+
+	status |= getIntegerParam(ADBinX, &binX);
+	status |= getIntegerParam(ADBinY, &binY);
+	status |= getIntegerParam(ADMinX, &minX);
+	status |= getIntegerParam(ADMinY, &minY);
+	status |= getIntegerParam(ADSizeX, &sizeX);
+	status |= getIntegerParam(ADSizeY, &sizeY);
+	status |= getIntegerParam(ADMaxSizeX, &maxSizeX);
+	status |= getIntegerParam(ADMaxSizeY, &maxSizeY);
+
+	if(status)
+	{
+		asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+			"%s:%s: error getting parameters\n", _driverName, functionName);
+		return XE_IOFAIL;
+	}
+
+	int imageSizeX = ((sizeX - 16) / binX) + 16;	// Take account of 16 pixel underscan which is always there and not binned
+	RoundUpToEven(imageSizeX); // Framegrabber requires that delivered image size is even
+	int imageSizeY = sizeY / binY;
+	RoundUpToEven(imageSizeY); // Framegrabber requires that delivered image size is even
+
+	if (_sequencerFilenameChanged)
+	{
+		// Read the new sequencer file
+		asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+			"%s:%s: New sequencer filename setting detected\n", _driverName, functionName);
+
+		LoadSequencer();
+
+		// The new sequencer filename has been responded to; don't do so again
+		_sequencerFilenameChanged = false;
+		// Download all parameters if Sequencer file has been uploaded
+		_roiParametersChanged = true;
+		_SequencerParametersChanged = true;
+		_acquireTimeChanged = true;
+		_shutterDelayChanged = true;
+		_shutterModeChanged = true;
+		_callGrabSetup = true;
+		_switchModeCheck = true;
+	}
+
+	if (_CCDPowerChanged)
+	{
+		asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+			"%s:%s: New CCD power setting detected\n", _driverName, functionName);
+
+		SetCCDPower();
+	}
+
+	if (_voltageParamsChanged)
+	{
+		SetCCDVoltages();
+	}
+
+	if (_TriggerModeChanged)
+	{
+		// Set the trigger mode
+		int triggerMode;
+		getIntegerParam(ADTriggerMode, &triggerMode);
+		result |= xcm_clm_set_param(_serialNumbers[0], 65, (short)triggerMode);
+		_TriggerModeChanged = false;
+		_switchModeCheck = true;
+	}
+
+	// Set the (global) gain and offset
+	if (_adcGainOffsetChanged)
+	{
+		result |= xcm_clm_cds_gain(_serialNumbers[0], (short)_paramADC_GAIN.ScaledValue(*this));
+		result |= xcm_clm_cds_offset(_serialNumbers[0], (short)_paramADC_OFFSET.ScaledValue(*this));
+		_adcGainOffsetChanged = false;
+	}
+
+	// Node select handled specially because value to set differs from combo box selection
+	if (_roiParametersChanged)
+	{
+		short node;
+		switch ((short)_paramSEQ_NODE_SELECTION.Value(*this))
+		{
+		case 0:
+			node = 1;
+			break;
+		case 1:
+			node = 2;
+			break;
+		case 2:
+			node = 4;
+			break;
+		case 3:
+			node = 8;
+			break;
+		default:
+			node = 1;
+		}
+
+		result |= xcm_clm_set_param(_serialNumbers[0], _paramSEQ_NODE_SELECTION.InternalIndex(), node);
+		_adcGainOffsetChanged = true;
+		_callGrabSetup = true;
+		_switchModeCheck = true;
+
+	}
+
+	// Set all the sequencer parameters
+	// Need to sequencer parameters if the node has been changed hence including '_roiParametersChanged' as an option
+	if ((_SequencerParametersChanged) || (_roiParametersChanged))
+	{
+		for (auto param : _sequencerParams)
+		{
+			result |= xcm_clm_set_param(_serialNumbers[0], param->InternalIndex(), (short)param->Value(*this));
+		}
+
+		_SequencerParametersChanged = false;
+		_callGrabSetup = true;
+		_switchModeCheck = true;
+	}
+
+	if (_roiParametersChanged)
+	{
+		// Set the registers as required (global calls)
+		result |= xcm_clm_set_param(_serialNumbers[0], 10, imageSizeX);
+		result |= xcm_clm_set_param(_serialNumbers[0], 11, imageSizeY);
+		result |= xcm_clm_set_param(_serialNumbers[0], 60, minX);
+		result |= xcm_clm_set_param(_serialNumbers[0], 61, minY);
+		result |= xcm_clm_set_param(_serialNumbers[0], 62, maxSizeX);
+		result |= xcm_clm_set_param(_serialNumbers[0], 63, maxSizeY);
+		result |= xcm_clm_set_param(_serialNumbers[0], 12, binX);
+		result |= xcm_clm_set_param(_serialNumbers[0], 9, binY);
+		_callGrabSetup = true;
+		_switchModeCheck = true;
+
+	}
+
+	if ((_acquireTimeChanged) || (_roiParametersChanged))
+	{
+		SetExposureTime();
+		_acquireTimeChanged = false;
+		_callGrabSetup = true;
+		_switchModeCheck = true;
+	}
+
+	// Enable the shutter if shutter mode is 'detector'
+	// Parameter 67 set to 15 to enable, 0 to disable
+	if (_shutterModeChanged)
+	{
+		int shutterMode;
+		getIntegerParam(ADShutterMode, &shutterMode);
+		result |= xcm_clm_set_param(_serialNumbers[0], 67, (short)(shutterMode == 2 ? 15 : 0));
+		_shutterModeChanged = false;
+	}
+	// Set the shutter close delay from ADShutterCloseDelay (convert to ms)
+	if (_shutterDelayChanged)
+	{
+		double shutterCloseDelay;
+		getDoubleParam(ADShutterCloseDelay, &shutterCloseDelay);
+		// We can't impose limits on this in the database since in EPICS shutter mode the limits
+		// may be different.  Instead we constrain here and (if necessary) set the readback value
+		if (shutterCloseDelay < 0)
+		{
+			shutterCloseDelay = 0;
+			setDoubleParam(ADShutterCloseDelay, shutterCloseDelay);
+		}
+		else if (shutterCloseDelay > 65.535)
+		{
+			shutterCloseDelay = 65.535;
+			setDoubleParam(ADShutterCloseDelay, shutterCloseDelay);
+		}
+
+		short shutterCloseDelay_ms = (short)(shutterCloseDelay * 1000.0 + 0.5);
+		result |= xcm_clm_set_param(_serialNumbers[0], 66, shutterCloseDelay_ms);
+		_shutterDelayChanged = false;
+	}
+
+	if (_callGrabSetup)
+	{
+		epicsThreadSleep(0.5);
+		_roiParametersChanged = false;
+	}
+
+	if (_switchModeCheck)
+	{
+		// Set the trigger mode
+		int triggerMode;
+		getIntegerParam(ADTriggerMode, &triggerMode);
+		// Check to see if we have been updating parameters whilst in an external trigger mode
+		if ((triggerMode < 3) || (triggerMode==5))
+		{
+			short node;
+			switch ((short)_paramSEQ_NODE_SELECTION.Value(*this))
+			{
+				case 0:
+					if (imageSizeX < 1654)
+						_grabWaitValue = 1.5;
+					else
+						_grabWaitValue = 2.5;
+					break;
+				case 1:
+					if (imageSizeX < 1654)
+						_grabWaitValue = 3;
+					else
+						_grabWaitValue = 6;
+					break;
+				default:
+					if (imageSizeX < 1654)
+						_grabWaitValue = 3;
+					else
+						_grabWaitValue = 6;
+					break;
+			}
+
+			_grabWaitFlag = true;
+
+			// Briefly release the external trigger mode and then set back to original state
+			result |= xcm_clm_set_param(_serialNumbers[0], 65, 3);
+			epicsThreadSleep(0.3);
+			result |= xcm_clm_set_param(_serialNumbers[0], 65, (short)triggerMode);
+			epicsThreadSleep(1);
+		}
+		_switchModeCheck = false;
+	}
+	callParamCallbacks();
+
+	return result;
 }
 
 #pragma region RIXS simulation
