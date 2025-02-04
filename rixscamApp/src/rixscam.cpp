@@ -750,6 +750,7 @@ void xcamCamera::imageTask()
 			{
 				// We saw the semaphore, so should do a real acquisition
 				acquire = true;
+				setIntegerParam(ADAcquire, acquire);
 				setStringParam(ADStatusMessage, "Acquiring data");
 				setIntegerParam(ADNumImagesCounter, 0);
 			}
@@ -797,6 +798,7 @@ void xcamCamera::imageTask()
 				}
 				if (status == epicsEventWaitOK) {
 					acquire = false;
+					setIntegerParam(ADAcquire, acquire);
 					if (imageMode == ADImageContinuous) {
 						setIntegerParam(ADStatus, ADStatusIdle);
 					}
@@ -1040,6 +1042,7 @@ void xcamCamera::imageTask()
 		if (epicsEventWaitOK == epicsEventTryWait(this->stopEventId))
 		{
 			acquire = false;
+			setIntegerParam(ADAcquire, acquire);
 			if (imageMode == ADImageContinuous) {
 				setIntegerParam(ADStatus, ADStatusIdle);
 			}
