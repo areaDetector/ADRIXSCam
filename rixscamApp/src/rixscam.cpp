@@ -1263,9 +1263,12 @@ void xcamCamera::temperatureTask(void)
 		} // Release the mutex, so camera thread can access xcmclm
 
 		double actualTempCelcius = DecodeTemperatureCelsius(encodedTemp);
+
+		this->lock();
 		setDoubleParam(ADTemperatureActual, actualTempCelcius);
 
 		callParamCallbacks();
+		this->unlock();
 
 		tSim += 0.1;
 	}
