@@ -358,6 +358,9 @@ protected:
 
 
 private:
+	// The acquisition task doesn't ensure ordenation between this mutex lock
+	// and the port lock, so, always ensure to use one or another to prevent
+	// dead lock.
 	epicsMutex _xcmclmMutex;
 
 	const size_t _sensorSizeX = 1600;
@@ -491,6 +494,9 @@ private:
 
     int computeRIXSArray(int sizeX, int sizeY);
     NDArray* GetImage();
+    int configureCaptureParams();
+    void doAcquisition(bool &acquisition_done);
+    epicsEventStatus preAcquisition();
 
 	enum temperatureControllerCommands
 	{
