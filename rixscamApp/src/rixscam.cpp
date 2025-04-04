@@ -1302,18 +1302,6 @@ asynStatus xcamCamera::writeInt32(asynUser *pasynUser, epicsInt32 value)
 			}
 			setStringParam(ADStatusMessage, "Acquiring data");
 		}
-		if (!value && acquiring)
-		{
-			setStringParam(ADStatusMessage, "Acquisition stopped");
-			if (imageMode == ADImageContinuous)
-			{
-				setIntegerParam(ADStatus, ADStatusIdle);
-			}
-			else
-			{
-				setIntegerParam(ADStatus, ADStatusAborted);
-			}
-		}
 	}
 	else if (_paramCCD_POWER.HasParameterIndex(function))
 	{
