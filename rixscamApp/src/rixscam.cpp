@@ -601,10 +601,9 @@ NDArray* xcamCamera::GetImage()
 		// so that all the images could be acquired into the same, final, buffer)
 
 		// Below is the original code that was found on the Register
-		for (size_t ccd = 0; ccd < ccdCount; ++ccd)
+		if (_callGrabSetup)
 		{
-#pragma __Note__("Force grab_setup, even when ROI unchanged (bug in xcmclm?)")
-			if (_callGrabSetup)
+			for (size_t ccd = 0; ccd < ccdCount; ++ccd)
 			{
 				// Release any previous buffer
 				if (_ccdImages[ccd] != nullptr)
@@ -630,6 +629,7 @@ NDArray* xcamCamera::GetImage()
 					(int)_paramSEQ_NODE_SELECTION.Value(*this) + 1);
 
 			}
+			_callGrabSetup = false;
 		}
 
 		if (triggerMode < 3)
