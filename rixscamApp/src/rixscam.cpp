@@ -899,8 +899,10 @@ void xcamCamera::doAcquisition(bool &acquisitionDone)
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
 		"%s:%s: delay=%f\n", _driverName, functionName, delay);
 
-	/* The delay can't be a negative value */
-	if(delay < 0) delay = 0;
+	/* If delay is closer to 0 this thread never sleeps and the mutex is
+	 * locked again before any of the other threads can lock it. */
+
+	delay = std::max(delay, 1e-5);
 
 	/* We set the status to waiting to indicate we are in the period delay */
 	setIntegerParam(ADStatus, ADStatusWaiting);
